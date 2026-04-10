@@ -54,3 +54,4 @@ Route::post('/api/register', [RegistrationController::class, 'register'])->name(
 Route::post('/api/login', [AuthenticationController::class, 'login'])->name('login');
 
 Route::post('/api/product/save/{product_uuid?}', [ProductController::class, 'save'])->name('product.save');
+Route::get('/api/product/search', [POSController::class, 'searchProducts'])->name('product.search');

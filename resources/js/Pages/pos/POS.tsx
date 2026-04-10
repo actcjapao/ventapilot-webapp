@@ -1,9 +1,79 @@
 import MainPanelLayout from "@/components/MainPanelLayout";
 // import { usePage } from "@inertiajs/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import axios from "axios";
 // import { PageProps } from "@/types/PageProp.type";
 
+interface Product {
+   uuid: string;
+   name: string;
+   price: number;
+   stock_quantity: number;
+   brand: string;
+   tags: string[];
+}
+
 const Products = () => {
+   const [query, setQuery] = useState<string>("");
+   const [results, setResults] = useState<Product[]>([]);
+   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+
+   const [quantity, setQuantity] = useState<number>(1);
+
+   const fetchProducts = useCallback(async (searchQuery: string) => {
+      if (searchQuery.length < 1) {
+         setResults([]);
+         return;
+      }
+
+      try {
+         const response = await axios.get(
+            `/api/product/search?q=${encodeURIComponent(searchQuery)}`,
+         );
+         const products = response.data;
+         console.log("Search results for query:", searchQuery, products);
+         setResults(products);
+      } catch (error) {
+         console.error("Error fetching products:", error);
+         setResults([]);
+      }
+   }, []);
+
+   useEffect(() => {
+      const timeoutId = setTimeout(() => {
+         fetchProducts(query);
+      }, 300); // Debounce 300ms
+      return () => clearTimeout(timeoutId);
+   }, [query, fetchProducts]);
+
+   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setQuery(value);
+      setShowDropdown(true);
+   };
+
+   const handleSearchInputBlur = () => {
+      // Delay hiding to allow click on dropdown
+      setTimeout(() => setShowDropdown(false), 150);
+   };
+
+   const handleProductSelect = (product: Product) => {
+      setSelectedProduct(product);
+      setShowDropdown(false);
+   };
+
+   const handleQuantityInputChange = (
+      e: React.ChangeEvent<HTMLInputElement>,
+   ) => {
+      const value = parseInt(e.target.value);
+      setQuantity(isNaN(value) ? 1 : value);
+   };
+
+   const handleAddItem = () => {
+      alert("ready to add item: " + selectedProduct?.name);
+   };
+
    //    const { flash } = usePage<PageProps>().props;
    // Reinitialize FlyonUI when component mounts
    // Without this, the modal won't work when navigating to this page via Inertia links
@@ -20,80 +90,105 @@ const Products = () => {
             <div className="w-3/4">
                <div className="card bg-base-100 shadow-sm">
                   <div className="card-body">
-                     <div
-                        data-theme="mintlify"
-                        className="relative max-w-sm"
-                        data-combo-box='{
-                              "apiUrl": "https://www.freetestapi.com/api/v1/countries",
-                              "outputItemTemplate": "<div class=\"dropdown-item combo-box-selected:dropdown-active\" data-combo-box-output-item><div class=\"flex justify-between items-center w-full\"><div data-combo-box-output-item-field=\"name\" data-combo-box-search-text data-combo-box-value></div><span class=\"icon-[tabler--check] text-primary combo-box-selected:block hidden size-4 shrink-0\"></span></div></div>"
-                          }'
-                     >
-                        <div className="relative">
-                           <input
-                              className="input"
-                              type="text"
-                              value=""
-                              placeholder="Search product..."
-                              role="combobox"
-                              aria-expanded="false"
-                              data-combo-box-input=""
-                              aria-label="Json-based combobox"
-                           />
-                        </div>
+                     <div className="relative max-w-sm">
+                        <input
+                           data-theme="mintlify"
+                           className="input"
+                           type="text"
+                           value={query}
+                           onChange={handleSearchInputChange}
+                           onBlur={handleSearchInputBlur}
+                           placeholder="Search product..."
+                           aria-label="Product search"
+                        />
+                        {showDropdown && results.length > 0 && (
+                           <div className="absolute top-full left-0 right-0 bg-base-100 rounded-box shadow-xl max-h-64 overflow-y-auto z-10">
+                              {results.map((product) => (
+                                 <div
+                                    key={product.uuid}
+                                    className="p-2 hover:bg-base-200 cursor-pointer flex justify-between items-center"
+                                    onClick={() => handleProductSelect(product)}
+                                 >
+                                    <span>{product.name}</span>
+                                    <span className="text-sm text-gray-500">
+                                       ${product.price}
+                                    </span>
+                                 </div>
+                              ))}
+                           </div>
+                        )}
                      </div>
                      <div className="mt-2 p-4 bg-base-200 rounded-box">
                         <h5 className="font-semibold mb-1">Product Preview</h5>
-                        <div className="grid grid-cols-3 gap-2">
-                           <div>
-                              <label className="block text-sm font-medium">
-                                 Name
-                              </label>
-                              <p className="text-base-content">Rice</p>
+                        {selectedProduct ? (
+                           <div className="grid grid-cols-3 gap-2">
+                              <div>
+                                 <label className="block text-sm font-medium">
+                                    Name
+                                 </label>
+                                 <p className="text-base-content">
+                                    {selectedProduct.name}
+                                 </p>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium">
+                                    Price
+                                 </label>
+                                 <p className="text-base-content">
+                                    ${Number(selectedProduct.price).toFixed(2)}
+                                 </p>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium">
+                                    Stock
+                                 </label>
+                                 <p className="text-base-content">
+                                    {selectedProduct.stock_quantity}
+                                 </p>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium">
+                                    Brand
+                                 </label>
+                                 <p className="text-base-content">
+                                    {selectedProduct.brand}
+                                 </p>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium">
+                                    Tags
+                                 </label>
+                                 <p className="text-base-content">
+                                    {selectedProduct.tags.join(", ")}
+                                 </p>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium">
+                                    Quantity
+                                 </label>
+                                 <input
+                                    data-theme="mintlify"
+                                    type="number"
+                                    className="input max-w-sm mt-2"
+                                    aria-label="input"
+                                    placeholder="Enter quantity"
+                                    min="1"
+                                    value={quantity}
+                                    onChange={handleQuantityInputChange}
+                                 />
+                              </div>
                            </div>
-                           <div>
-                              <label className="block text-sm font-medium">
-                                 Price
-                              </label>
-                              <p className="text-base-content">$5.00</p>
-                           </div>
-                           <div>
-                              <label className="block text-sm font-medium">
-                                 Stock
-                              </label>
-                              <p className="text-base-content">50</p>
-                           </div>
-                           <div>
-                              <label className="block text-sm font-medium">
-                                 Brand
-                              </label>
-                              <p className="text-base-content">Brand A</p>
-                           </div>
-                           <div>
-                              <label className="block text-sm font-medium">
-                                 Tags
-                              </label>
-                              <p className="text-base-content">
-                                 Food, Staple, Rice
-                              </p>
-                           </div>
-                           <div>
-                              <label className="block text-sm font-medium">
-                                 Quantity
-                              </label>
-                              <input
-                                 data-theme="mintlify"
-                                 type="number"
-                                 className="input max-w-sm mt-2"
-                                 aria-label="input"
-                                 placeholder="Enter quantity"
-                                 min="1"
-                              />
-                           </div>
-                        </div>
+                        ) : (
+                           <p className="text-gray-500">
+                              -- search a product to preview --
+                           </p>
+                        )}
                         <div className="mt-4">
                            <button
                               data-theme="mintlify"
                               className="btn btn-primary btn-sm"
+                              disabled={!selectedProduct}
+                              onClick={handleAddItem}
                            >
                               Add item
                            </button>
