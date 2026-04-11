@@ -15,7 +15,7 @@ const Products = () => {
    const [showDropdown, setShowDropdown] = useState<boolean>(false);
    const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-   const [quantity, setQuantity] = useState<number>(1);
+   const [quantity, setQuantity] = useState<string>("1");
    const [invalidQuantity, setInvalidQuantity] = useState<boolean>(false);
 
    const fetchProducts = useCallback(async (searchQuery: string) => {
@@ -55,7 +55,7 @@ const Products = () => {
    };
 
    const handleProductSelect = (product: Product) => {
-      setQuantity(1);
+      setQuantity("1");
       setSelectedProduct(product);
       setQuery(product.name);
       setShowDropdown(false);
@@ -65,8 +65,7 @@ const Products = () => {
       e: React.ChangeEvent<HTMLInputElement>,
    ) => {
       setInvalidQuantity(false);
-      const value = parseInt(e.target.value);
-      setQuantity(value);
+      setQuantity(e.target.value);
    };
 
    const handleAddItem = () => {
@@ -74,7 +73,11 @@ const Products = () => {
          return;
       }
 
-      const normalizedQuantity = isNaN(quantity) || quantity < 0 ? 0 : quantity;
+      const parsedQuantity = parseInt(quantity, 10);
+      const normalizedQuantity =
+         Number.isNaN(parsedQuantity) || parsedQuantity <= 0
+            ? 0
+            : parsedQuantity;
       if (normalizedQuantity === 0) {
          setInvalidQuantity(true);
          return;
@@ -91,12 +94,15 @@ const Products = () => {
             const existingItem = updatedItems[existingIndex];
             updatedItems[existingIndex] = {
                ...existingItem,
-               quantity: existingItem.quantity + quantity,
+               quantity: existingItem.quantity + normalizedQuantity,
             };
             return updatedItems;
          }
 
-         return [...currentItems, { product: selectedProduct, quantity }];
+         return [
+            ...currentItems,
+            { product: selectedProduct, quantity: normalizedQuantity },
+         ];
       });
    };
 
