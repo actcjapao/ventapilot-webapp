@@ -13,13 +13,20 @@ interface Product {
    tags: string[];
 }
 
+interface CartItem {
+   product: Product;
+   quantity: number;
+}
+
 const Products = () => {
    const [query, setQuery] = useState<string>("");
    const [results, setResults] = useState<Product[]>([]);
    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
    const [showDropdown, setShowDropdown] = useState<boolean>(false);
+   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
    const [quantity, setQuantity] = useState<number>(1);
+   const [invalidQuantity, setInvalidQuantity] = useState<boolean>(false);
 
    const fetchProducts = useCallback(async (searchQuery: string) => {
       if (searchQuery.length < 1) {
@@ -32,7 +39,6 @@ const Products = () => {
             `/api/product/search?q=${encodeURIComponent(searchQuery)}`,
          );
          const products = response.data;
-         console.log("Search results for query:", searchQuery, products);
          setResults(products);
       } catch (error) {
          console.error("Error fetching products:", error);
@@ -59,22 +65,57 @@ const Products = () => {
    };
 
    const handleProductSelect = (product: Product) => {
+      setQuantity(1);
       setSelectedProduct(product);
+      setQuery(product.name);
       setShowDropdown(false);
    };
 
    const handleQuantityInputChange = (
       e: React.ChangeEvent<HTMLInputElement>,
    ) => {
+      setInvalidQuantity(false);
       const value = parseInt(e.target.value);
-      setQuantity(isNaN(value) ? 1 : value);
+      setQuantity(value);
    };
 
    const handleAddItem = () => {
-      alert("ready to add item: " + selectedProduct?.name);
+      if (!selectedProduct) {
+         return;
+      }
+
+      const normalizedQuantity = isNaN(quantity) || quantity < 0 ? 0 : quantity;
+      if (normalizedQuantity === 0) {
+         setInvalidQuantity(true);
+         return;
+      }
+
+      setCartItems((currentItems) => {
+         // Check if the product is already in the cart, if so, update the quantity
+         const existingIndex = currentItems.findIndex(
+            (item) => item.product.uuid === selectedProduct.uuid,
+         );
+
+         if (existingIndex >= 0) {
+            const updatedItems = [...currentItems];
+            const existingItem = updatedItems[existingIndex];
+            updatedItems[existingIndex] = {
+               ...existingItem,
+               quantity: existingItem.quantity + quantity,
+            };
+            return updatedItems;
+         }
+
+         return [...currentItems, { product: selectedProduct, quantity }];
+      });
    };
 
-   //    const { flash } = usePage<PageProps>().props;
+   const handleRemoveItem = (productUuid: string) => {
+      setCartItems((currentItems) =>
+         currentItems.filter((item) => item.product.uuid !== productUuid),
+      );
+   };
+
    // Reinitialize FlyonUI when component mounts
    // Without this, the modal won't work when navigating to this page via Inertia links
    useEffect(() => {
@@ -172,10 +213,14 @@ const Products = () => {
                                     className="input max-w-sm mt-2"
                                     aria-label="input"
                                     placeholder="Enter quantity"
-                                    min="1"
                                     value={quantity}
                                     onChange={handleQuantityInputChange}
                                  />
+                                 {invalidQuantity && (
+                                    <p className="text-sm text-error mt-1">
+                                       Please enter a valid quantity.
+                                    </p>
+                                 )}
                               </div>
                            </div>
                         ) : (
@@ -208,34 +253,49 @@ const Products = () => {
                               </thead>
                               <tbody>
                                  {/* Selected products will be populated here */}
-                                 <tr>
-                                    <td>Rice</td>
-                                    <td>2</td>
-                                    <td>$5.00</td>
-                                    <td>$10.00</td>
-                                    <td className="text-right">
-                                       <button
-                                          data-theme="mintlify"
-                                          className="btn btn-sm btn-error"
+                                 {cartItems.length === 0 ? (
+                                    <tr>
+                                       <td
+                                          colSpan={5}
+                                          className="text-center text-sm text-gray-500"
                                        >
-                                          Remove
-                                       </button>
-                                    </td>
-                                 </tr>
-                                 <tr>
-                                    <td>Soap</td>
-                                    <td>1</td>
-                                    <td>$3.00</td>
-                                    <td>$3.00</td>
-                                    <td className="text-right">
-                                       <button
-                                          data-theme="mintlify"
-                                          className="btn btn-sm btn-error"
-                                       >
-                                          Remove
-                                       </button>
-                                    </td>
-                                 </tr>
+                                          No items added yet.
+                                       </td>
+                                    </tr>
+                                 ) : (
+                                    cartItems.map((item) => (
+                                       <tr key={item.product.uuid}>
+                                          <td>{item.product.name}</td>
+                                          <td>{item.quantity}</td>
+                                          <td>
+                                             $
+                                             {Number(
+                                                item.product.price,
+                                             ).toFixed(2)}
+                                          </td>
+                                          <td>
+                                             $
+                                             {(
+                                                item.product.price *
+                                                item.quantity
+                                             ).toFixed(2)}
+                                          </td>
+                                          <td className="text-right">
+                                             <button
+                                                data-theme="mintlify"
+                                                className="btn btn-sm btn-error"
+                                                onClick={() =>
+                                                   handleRemoveItem(
+                                                      item.product.uuid,
+                                                   )
+                                                }
+                                             >
+                                                Remove
+                                             </button>
+                                          </td>
+                                       </tr>
+                                    ))
+                                 )}
                               </tbody>
                            </table>
                         </div>
