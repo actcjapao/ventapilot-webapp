@@ -13,6 +13,17 @@ const Products = () => {
 
    const [quantity, setQuantity] = useState<string>("1");
    const [invalidQuantity, setInvalidQuantity] = useState<boolean>(false);
+   const [cash, setCash] = useState<string>("");
+
+   const calculateTotalAmount = () => {
+      return cartItems.reduce((total, item) => {
+         return total + item.product.price * item.quantity;
+      }, 0);
+   };
+
+   const totalAmount = calculateTotalAmount();
+   const cashAmount = parseFloat(cash) || 0;
+   const change = cash === "" ? 0 : cashAmount - totalAmount;
 
    const fetchProducts = useCallback(async (searchQuery: string) => {
       if (searchQuery.length < 1) {
@@ -304,7 +315,9 @@ const Products = () => {
                            <label className="block text-sm font-medium">
                               Total Amount
                            </label>
-                           <p className="text-lg font-bold">₱13.00</p>
+                           <p className="text-lg font-bold">
+                              ₱{totalAmount.toFixed(2)}
+                           </p>
                         </div>
                         <div>
                            <label className="block text-sm font-medium">
@@ -317,13 +330,15 @@ const Products = () => {
                               placeholder="Enter cash amount"
                               min="0"
                               step="0.01"
+                              value={cash}
+                              onChange={(e) => setCash(e.target.value)}
                            />
                         </div>
                         <div>
                            <label className="block text-sm font-medium">
                               Change
                            </label>
-                           <p className="text-lg">₱0.00</p>
+                           <p className="text-lg">₱{change.toFixed(2)}</p>
                         </div>
                         <button
                            data-theme="mintlify"
