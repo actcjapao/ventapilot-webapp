@@ -21,6 +21,7 @@ const Products = () => {
       }, 0);
    };
 
+   // Re-triggered every time cartItems changes as calculateTotalAmount is using a state variable
    const totalAmount = calculateTotalAmount();
    const cashAmount = parseFloat(cash) || 0;
    const change = cash === "" ? 0 : cashAmount - totalAmount;
