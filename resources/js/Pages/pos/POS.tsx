@@ -19,7 +19,7 @@ const Products = () => {
 
    const calculateTotalAmount = () => {
       return cartItems.reduce((total, item) => {
-         return total + item.product.price * item.quantity;
+         return total + item.product.selling_price * item.quantity;
       }, 0);
    };
 
@@ -180,7 +180,7 @@ const Products = () => {
                                  >
                                     <span>{product.name}</span>
                                     <span className="text-sm text-gray-500">
-                                       ₱{product.price}
+                                       ₱{product.selling_price}
                                     </span>
                                  </div>
                               ))}
@@ -204,7 +204,10 @@ const Products = () => {
                                     Price
                                  </label>
                                  <p className="text-base-content">
-                                    ₱{Number(selectedProduct.price).toFixed(2)}
+                                    ₱
+                                    {Number(
+                                       selectedProduct.selling_price,
+                                    ).toFixed(2)}
                                  </p>
                               </div>
                               <div>
@@ -298,13 +301,13 @@ const Products = () => {
                                           <td>
                                              ₱
                                              {Number(
-                                                item.product.price,
+                                                item.product.selling_price,
                                              ).toFixed(2)}
                                           </td>
                                           <td>
                                              ₱
                                              {(
-                                                item.product.price *
+                                                item.product.selling_price *
                                                 item.quantity
                                              ).toFixed(2)}
                                           </td>

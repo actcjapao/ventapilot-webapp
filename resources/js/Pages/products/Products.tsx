@@ -22,7 +22,8 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
          brand: "",
          description: "",
          stock_quantity: "",
-         price: "",
+         cost_price: "",
+         selling_price: "",
          tags: [] as string[],
       });
 
@@ -117,7 +118,8 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
          brand: product.brand || "",
          description: product.description || "",
          stock_quantity: String(product.stock_quantity),
-         price: String(product.price),
+         cost_price: String(product.cost_price),
+         selling_price: String(product.selling_price),
          tags: product.tags || [],
       }));
    };
@@ -154,7 +156,7 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                               <th>Name</th>
                               <th>Brand</th>
                               <th>Stock</th>
-                              <th>Price</th>
+                              <th>Selling Price</th>
                               <th>Status</th>
                               <th className="text-right">Actions</th>
                            </tr>
@@ -187,7 +189,10 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                                        <td>{product.brand || "-"}</td>
                                        <td>{product.stock_quantity}</td>
                                        <td>
-                                          ₱{Number(product.price).toFixed(2)}
+                                          ₱
+                                          {Number(
+                                             product.selling_price,
+                                          ).toFixed(2)}
                                        </td>
                                        <td>
                                           <span
@@ -450,29 +455,55 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                               </p>
                            )}
                         </div>
-                        <div className="w-full space-y-2">
-                           <label
-                              className="label-text font-medium"
-                              htmlFor="price"
-                           >
-                              Price
-                           </label>
-                           <input
-                              id="price"
-                              data-theme="mintlify"
-                              type="text"
-                              className={`input w-full ${hasError("price") ? "is-invalid" : ""}`}
-                              value={data.price}
-                              onChange={(e) => {
-                                 setData("price", e.target.value);
-                                 clearErrors("price");
-                              }}
-                           />
-                           {hasError("price") && (
-                              <p className="mt-1 text-sm text-red-500">
-                                 {errors.price}
-                              </p>
-                           )}
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                              <label
+                                 className="label-text font-medium"
+                                 htmlFor="cost_price"
+                              >
+                                 Cost Price
+                              </label>
+                              <input
+                                 id="cost_price"
+                                 data-theme="mintlify"
+                                 type="text"
+                                 className={`input w-full ${hasError("cost_price") ? "is-invalid" : ""}`}
+                                 value={data.cost_price}
+                                 onChange={(e) => {
+                                    setData("cost_price", e.target.value);
+                                    clearErrors("cost_price");
+                                 }}
+                              />
+                              {hasError("cost_price") && (
+                                 <p className="mt-1 text-sm text-red-500">
+                                    {errors.cost_price}
+                                 </p>
+                              )}
+                           </div>
+                           <div className="space-y-2">
+                              <label
+                                 className="label-text font-medium"
+                                 htmlFor="selling_price"
+                              >
+                                 Selling Price
+                              </label>
+                              <input
+                                 id="selling_price"
+                                 data-theme="mintlify"
+                                 type="text"
+                                 className={`input w-full ${hasError("selling_price") ? "is-invalid" : ""}`}
+                                 value={data.selling_price}
+                                 onChange={(e) => {
+                                    setData("selling_price", e.target.value);
+                                    clearErrors("selling_price");
+                                 }}
+                              />
+                              {hasError("selling_price") && (
+                                 <p className="mt-1 text-sm text-red-500">
+                                    {errors.selling_price}
+                                 </p>
+                              )}
+                           </div>
                         </div>
                         {/* Tags Field */}
                         <div className="w-full space-y-2 mt-4">

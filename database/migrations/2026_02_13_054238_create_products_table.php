@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->text('description')->nullable();
             $table->unsignedInteger('stock_quantity')->default(0); // less storage space data type
-            $table->decimal('price', 10, 2)->default(0.00); // 10 digits total, 2 after decimal
+            $table->decimal('cost_price', 10, 2)->default(0.00); // 10 digits total, 2 after decimal
+            $table->decimal('selling_price', 10, 2)->default(0.00); // 10 digits total, 2 after decimal
             $table->json('tags')->nullable();
             $table->boolean('is_active')->default(true);
 

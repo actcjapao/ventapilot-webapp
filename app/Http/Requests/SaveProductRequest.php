@@ -30,7 +30,8 @@ class SaveProductRequest extends FormRequest
             'description' => ['nullable', 'string'],
 
             'stock_quantity' => ['required', 'integer', 'min:0'],
-            'price' => ['required', 'numeric', 'min:0'],
+            'cost_price' => ['required', 'numeric', 'min:0'],
+            'selling_price' => ['required', 'numeric', 'min:0'],
 
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
@@ -64,9 +65,13 @@ class SaveProductRequest extends FormRequest
             'stock_quantity.integer' => 'Stock quantity must be an integer.',
             'stock_quantity.min' => 'Stock quantity cannot be negative.',
 
-            'price.required' => 'Price is required.',
-            'price.numeric' => 'Price must be a number.',
-            'price.min' => 'Price cannot be negative.',
+            'cost_price.required' => 'Cost price is required.',
+            'cost_price.numeric' => 'Cost price must be a number.',
+            'cost_price.min' => 'Cost price cannot be negative.',
+
+            'selling_price.required' => 'Selling price is required.',
+            'selling_price.numeric' => 'Selling price must be a number.',
+            'selling_price.min' => 'Selling price cannot be negative.',
 
             'tags.array' => 'Tags must be an array.',
             'tags.*.string' => 'Each tag must be a string.',

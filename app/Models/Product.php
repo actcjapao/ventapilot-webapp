@@ -34,7 +34,8 @@ class Product extends Model
         'brand',
         'description',
         'stock_quantity',
-        'price',
+        'cost_price',
+        'selling_price',
         'tags',
     ];
 

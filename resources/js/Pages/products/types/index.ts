@@ -5,7 +5,8 @@ export type Product = {
    brand: string | null;
    description: string | null;
    stock_quantity: number;
-   price: number;
+   cost_price: number;
+   selling_price: number;
    tags: string[];
    is_active: boolean;
 };

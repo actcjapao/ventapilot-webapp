@@ -48,7 +48,7 @@ class ProductController extends Controller
                         ->select([
                             'id', 'uuid', 'store_id',
                             'name', 'brand', 'description',
-                            'price', 'stock_quantity', 'tags',
+                            'cost_price', 'selling_price', 'stock_quantity', 'tags',
                             'is_active', 'created_at', 'updated_at'])
                         ->latest()
                         ->paginate(self::PRODUCTS_PER_PAGE);

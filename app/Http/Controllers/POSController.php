@@ -33,7 +33,7 @@ class POSController extends Controller
 
         $products = Product::where('store_id', $storeId)
                           ->where('name', 'like', '%' . $query . '%')
-                          ->select(['uuid', 'name', 'price', 'stock_quantity', 'brand', 'tags'])
+                          ->select(['uuid', 'name', 'cost_price', 'selling_price', 'stock_quantity', 'brand', 'tags'])
                           ->limit(10)
                           ->get();
         Log::info("Products loaded for store", ['products' => $products]);
