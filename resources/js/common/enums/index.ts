@@ -1,4 +1,1 @@
-export enum ResponseKey {
-   Error = "error",
-   Success = "success",
-}
+export type ResponseKey = "success" | "error";

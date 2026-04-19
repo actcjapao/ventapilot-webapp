@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Product } from "@/Pages/products/types";
 import { CartItem, ProcessSaleResponse } from "./types";
-import { ResponseKey } from "@/common/enums";
 import SaleProcessingAlert from "./SaleProcessingAlert";
 
 const Products = () => {
@@ -156,7 +155,7 @@ const Products = () => {
          if (response.status === 201) {
             const { data } = response.data;
             setProcessSaleResponse({
-               key: ResponseKey.Success,
+               key: data.key,
                status_code: 201,
                message: data.message,
                sale_uuid: data.sale_uuid,
@@ -172,7 +171,7 @@ const Products = () => {
       } catch (error) {
          if (axios.isAxiosError(error)) {
             setProcessSaleResponse({
-               key: ResponseKey.Error,
+               key: error.response?.data.key,
                status_code: error.response?.status ?? 500,
                message: error.response?.data.message,
             });

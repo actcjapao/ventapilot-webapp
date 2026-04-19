@@ -1,4 +1,3 @@
-import { ResponseKey } from "@/common/enums";
 import { ProcessSaleResponse } from "./types";
 
 const SaleProcessingAlert = ({
@@ -7,7 +6,7 @@ const SaleProcessingAlert = ({
    processSaleResponse: ProcessSaleResponse;
 }) => {
    const isSuccess =
-      processSaleResponse.key === ResponseKey.Success &&
+      processSaleResponse.key === "success" &&
       processSaleResponse.status_code === 201;
 
    const config = isSuccess
