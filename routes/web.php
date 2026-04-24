@@ -56,3 +56,4 @@ Route::post('/api/login', [AuthenticationController::class, 'login'])->name('log
 Route::post('/api/product/save/{product_uuid?}', [ProductController::class, 'save'])->name('product.save');
 Route::get('/api/product/search', [POSController::class, 'searchProducts'])->name('product.search');
 Route::post('/api/sale', [POSController::class, 'processSale'])->name('sale.process');
+Route::post('/api/debt', [POSController::class, 'processDebt'])->name('debt.process');

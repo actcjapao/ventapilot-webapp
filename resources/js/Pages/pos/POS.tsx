@@ -2,7 +2,7 @@ import MainPanelLayout from "@/components/MainPanelLayout";
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Product } from "@/Pages/products/types";
-import { CartItem, ProcessSaleResponse } from "./types";
+import { CartItem, ProcessDebtResponse, ProcessSaleResponse } from "./types";
 import SaleProcessingAlert from "./SaleProcessingAlert";
 
 const Products = () => {
@@ -25,6 +25,9 @@ const Products = () => {
 
    const [processSaleResponse, setProcessSaleResponse] = useState<
       ProcessSaleResponse | undefined
+   >();
+   const [processDebtResponse, setProcessDebtResponse] = useState<
+      ProcessDebtResponse | undefined
    >();
 
    const calculateTotalAmount = () => {
@@ -143,6 +146,51 @@ const Products = () => {
       }
    }, []);
 
+   const processDebt = async () => {
+      if (customerName === "") {
+         setInvalidCustomerName(true);
+         return;
+      }
+
+      try {
+         const payload = {
+            items: cartItems,
+            total_amount: totalAmount,
+            payment_amount: cashAmount,
+            customer_name: customerName,
+         };
+         const response = await axios.post("/api/debt", {
+            ...payload,
+            due_date: dueDate || null,
+         });
+
+         if (response.status === 201) {
+            const { data } = response.data;
+            setProcessDebtResponse({
+               key: data.key,
+               status_code: 201,
+               message: data.message,
+               debt_uuid: data.debt_uuid,
+            });
+         }
+
+         // Reset after success
+         setCustomerName("");
+         setInvalidCustomerName(false);
+         setDueDate("");
+      } catch (error) {
+         if (axios.isAxiosError(error)) {
+            setProcessDebtResponse({
+               key: error.response?.data.key,
+               status_code: error.response?.status ?? 500,
+               message: error.response?.data.message,
+            });
+         } else {
+            console.error("Unexpected error:", error);
+         }
+      }
+   };
+
    const processSale = async () => {
       if (cash === "" || change < 0) {
          setInvalidCashAmount(true);
@@ -168,11 +216,8 @@ const Products = () => {
          }
 
          // Reset after success
-         setCartItems([]);
-         setSelectedProduct(null);
-         setQuery("");
          setCash("");
-         setIsDebt(false);
+         setInvalidCashAmount(false);
       } catch (error) {
          if (axios.isAxiosError(error)) {
             setProcessSaleResponse({
@@ -188,15 +233,15 @@ const Products = () => {
 
    const processItems = async () => {
       if (isDebt) {
-         alert(
-            "Processing as debt. Customer Name: " +
-               customerName +
-               ", Due Date: " +
-               dueDate,
-         );
+         processDebt();
       } else {
          processSale();
       }
+
+      setQuery("");
+      setSelectedProduct(null);
+      setCartItems([]);
+      setIsDebt(false);
    };
 
    return (

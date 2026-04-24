@@ -11,3 +11,9 @@ export type ProcessSaleResponse =
         sale_uuid: string;
      })
    | BaseResponse;
+
+export type ProcessDebtResponse =
+   | (BaseResponse & {
+        debt_uuid: string;
+     })
+   | BaseResponse;
