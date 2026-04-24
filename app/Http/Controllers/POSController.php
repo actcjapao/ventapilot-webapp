@@ -147,7 +147,7 @@ class POSController extends Controller
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'total_amount' => ['required', 'numeric', 'min:0'],
             'payment_amount' => ['required', 'numeric', 'min:0'],
-            'due_date' => ['string', 'max:255'],
+            'due_date' => ['nullable', 'string', 'max:255'],
         ]);
 
         DB::beginTransaction();

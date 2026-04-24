@@ -1,13 +1,11 @@
-import { ProcessSaleResponse } from "./types";
+import { ProcessDebtResponse, ProcessSaleResponse } from "./types";
 
-const SaleProcessingAlert = ({
-   processSaleResponse,
+const ProcessingAlert = ({
+   response,
 }: {
-   processSaleResponse: ProcessSaleResponse;
+   response: ProcessSaleResponse | ProcessDebtResponse;
 }) => {
-   const isSuccess =
-      processSaleResponse.key === "success" &&
-      processSaleResponse.status_code === 201;
+   const isSuccess = response.key === "success" && response.status_code === 201;
 
    const config = isSuccess
       ? {
@@ -26,9 +24,9 @@ const SaleProcessingAlert = ({
          role="alert"
       >
          <span className={`icon-[tabler--${config.icon}] size-5`} />
-         <small>{processSaleResponse.message}</small>
+         <small>{response.message}</small>
       </div>
    );
 };
 
-export default SaleProcessingAlert;
+export default ProcessingAlert;

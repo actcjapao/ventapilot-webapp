@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Product } from "@/Pages/products/types";
 import { CartItem, ProcessDebtResponse, ProcessSaleResponse } from "./types";
-import SaleProcessingAlert from "./SaleProcessingAlert";
+import ProcessingAlert from "./ProcessingAlert";
 
 const Products = () => {
    const [query, setQuery] = useState<string>("");
@@ -146,22 +146,19 @@ const Products = () => {
       }
    }, []);
 
-   const processDebt = async () => {
+   const processDebt = async (): Promise<boolean> => {
       if (customerName === "") {
          setInvalidCustomerName(true);
-         return;
+         return false;
       }
 
       try {
-         const payload = {
+         const response = await axios.post("/api/debt", {
             items: cartItems,
             total_amount: totalAmount,
             payment_amount: cashAmount,
             customer_name: customerName,
-         };
-         const response = await axios.post("/api/debt", {
-            ...payload,
-            due_date: dueDate || null,
+            ...(dueDate ? { due_date: dueDate } : {}),
          });
 
          if (response.status === 201) {
@@ -172,29 +169,36 @@ const Products = () => {
                message: data.message,
                debt_uuid: data.debt_uuid,
             });
+
+            // Reset after success
+            setCustomerName("");
+            setInvalidCustomerName(false);
+            setDueDate("");
+            return true;
          }
 
-         // Reset after success
-         setCustomerName("");
-         setInvalidCustomerName(false);
-         setDueDate("");
+         return false;
       } catch (error) {
          if (axios.isAxiosError(error)) {
             setProcessDebtResponse({
-               key: error.response?.data.key,
+               key: error.response?.data.key ?? "error",
                status_code: error.response?.status ?? 500,
-               message: error.response?.data.message,
+               message:
+                  error.response?.data.message ||
+                  error.response?.data.error ||
+                  "Failed to process debt.",
             });
          } else {
             console.error("Unexpected error:", error);
          }
+         return false;
       }
    };
 
-   const processSale = async () => {
+   const processSale = async (): Promise<boolean> => {
       if (cash === "" || change < 0) {
          setInvalidCashAmount(true);
-         return;
+         return false;
       }
 
       try {
@@ -213,36 +217,65 @@ const Products = () => {
                message: data.message,
                sale_uuid: data.sale_uuid,
             });
+
+            // Reset after success
+            setCash("");
+            setInvalidCashAmount(false);
+            return true;
          }
 
-         // Reset after success
-         setCash("");
-         setInvalidCashAmount(false);
+         return false;
       } catch (error) {
          if (axios.isAxiosError(error)) {
             setProcessSaleResponse({
-               key: error.response?.data.key,
+               key: error.response?.data.key ?? "error",
                status_code: error.response?.status ?? 500,
-               message: error.response?.data.message,
+               message:
+                  error.response?.data.message ||
+                  error.response?.data.error ||
+                  "Failed to process sale.",
             });
          } else {
             console.error("Unexpected error:", error);
          }
+         return false;
       }
    };
 
    const processItems = async () => {
-      if (isDebt) {
-         processDebt();
-      } else {
-         processSale();
+      const success = isDebt ? await processDebt() : await processSale();
+
+      if (success) {
+         setQuery("");
+         setSelectedProduct(null);
+         setCartItems([]);
+         setIsDebt(false);
+      }
+   };
+
+   useEffect(() => {
+      if (!processSaleResponse) {
+         return;
       }
 
-      setQuery("");
-      setSelectedProduct(null);
-      setCartItems([]);
-      setIsDebt(false);
-   };
+      const timer = setTimeout(() => {
+         setProcessSaleResponse(undefined);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+   }, [processSaleResponse]);
+
+   useEffect(() => {
+      if (!processDebtResponse) {
+         return;
+      }
+
+      const timer = setTimeout(() => {
+         setProcessDebtResponse(undefined);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+   }, [processDebtResponse]);
 
    return (
       <>
@@ -513,9 +546,11 @@ const Products = () => {
                               </div>
                            </>
                         )}
-                        {processSaleResponse !== undefined && (
-                           <SaleProcessingAlert
-                              processSaleResponse={processSaleResponse}
+                        {(processSaleResponse || processDebtResponse) && (
+                           <ProcessingAlert
+                              response={
+                                 processSaleResponse ?? processDebtResponse!
+                              }
                            />
                         )}
                         <button
