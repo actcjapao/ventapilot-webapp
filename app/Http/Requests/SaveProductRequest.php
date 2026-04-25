@@ -48,7 +48,7 @@ class SaveProductRequest extends FormRequest
     public function messages(): array
     {        
         return [
-           'store_id.required' => 'Store ID is required.',
+            'store_id.required' => 'Store ID is required.',
             'store_id.integer' => 'Store ID must be an integer.',
             'store_id.exists' => 'The specified store does not exist.',
 

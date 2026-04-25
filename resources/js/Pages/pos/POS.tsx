@@ -29,6 +29,7 @@ const Products = () => {
    const [processDebtResponse, setProcessDebtResponse] = useState<
       ProcessDebtResponse | undefined
    >();
+   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
    const calculateTotalAmount = () => {
       return cartItems.reduce((total, item) => {
@@ -243,9 +244,19 @@ const Products = () => {
    };
 
    const processItems = async () => {
+      setIsProcessing(true);
+
+      if (cartItems.length === 0) {
+         setIsProcessing(false);
+         alert("No items in the cart to process.");
+         return;
+      }
+
       const success = isDebt ? await processDebt() : await processSale();
 
       if (success) {
+         setIsProcessing(false);
+
          setQuery("");
          setSelectedProduct(null);
          setCartItems([]);
@@ -557,7 +568,7 @@ const Products = () => {
                            data-theme="mintlify"
                            className="btn btn-primary w-full"
                            onClick={processItems}
-                           disabled={cartItems.length === 0}
+                           disabled={isProcessing}
                         >
                            Process
                         </button>

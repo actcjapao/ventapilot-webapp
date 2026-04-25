@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\ProcessSaleRequest;
+use App\Http\Requests\ProcessDebtRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -46,15 +48,8 @@ class POSController extends Controller
         return response()->json($products);
     }
 
-    function processSale(Request $request) {
-        $data = $request->validate([
-            'items' => ['required', 'array'],
-            'items.*.product.uuid' => ['required', 'uuid', 'exists:products,uuid'],
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'total_amount' => ['required', 'numeric', 'min:0'],
-            'payment_amount' => ['required', 'numeric', 'min:0'],
-            'change_amount' => ['required', 'numeric', 'min:0'],
-        ]);
+    function processSale(ProcessSaleRequest $request) {
+        $data = $request->validated();
 
         DB::beginTransaction();
         
@@ -139,16 +134,8 @@ class POSController extends Controller
         }
     }
 
-    function processDebt(Request $request) {
-        $data = $request->validate([
-            'customer_name' => ['required', 'string', 'max:255'],
-            'items' => ['required', 'array'],
-            'items.*.product.uuid' => ['required', 'uuid', 'exists:products,uuid'],
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'total_amount' => ['required', 'numeric', 'min:0'],
-            'payment_amount' => ['required', 'numeric', 'min:0'],
-            'due_date' => ['nullable', 'string', 'max:255'],
-        ]);
+    function processDebt(ProcessDebtRequest $request) {
+        $data = $request->validated();
 
         DB::beginTransaction();
         
