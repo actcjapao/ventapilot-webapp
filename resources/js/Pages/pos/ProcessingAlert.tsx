@@ -6,11 +6,11 @@ const ProcessingAlert = ({ response }: { response: BaseResponse }) => {
    const config = isSuccess
       ? {
            background: "primary",
-           icon: "circle-check",
+           iconClass: "icon-[tabler--circle-check]",
         }
       : {
            background: "error",
-           icon: "circle-x",
+           iconClass: "icon-[tabler--circle-x]",
         };
 
    return (
@@ -19,7 +19,7 @@ const ProcessingAlert = ({ response }: { response: BaseResponse }) => {
          className={`alert alert-${config.background} py-2 flex items-center gap-2`}
          role="alert"
       >
-         <span className={`icon-[tabler--${config.icon}] size-5`} />
+         <span className={`${config.iconClass} size-5`} />
          <small>{response.message}</small>
       </div>
    );
