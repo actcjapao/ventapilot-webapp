@@ -1,5 +1,5 @@
 import MainPanelLayout from "@/components/MainPanelLayout";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import StatusCard from "./StatusCard";
 
 const Sales = () => {
@@ -12,6 +12,12 @@ const Sales = () => {
       }
    }, []);
 
+   const [dateRange, setDateRange] = useState<string>("Today");
+
+   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setDateRange(e.target.value);
+   };
+
    return (
       <>
          <div className="flex gap-4">
@@ -23,38 +29,54 @@ const Sales = () => {
                   data-theme="mintlify"
                   className="select mt-1"
                   id="favorite-simpson"
+                  value={dateRange}
+                  onChange={handleChange}
                >
-                  <option selected>Today</option>
-                  <option>This week</option>
-                  <option>This month</option>
-                  <option>Custom</option>
+                  <option value="Today">Today</option>
+                  <option value="This week">This week</option>
+                  <option value="This month">This month</option>
+                  <option value="Custom">Custom</option>
                </select>
             </div>
-            <div className="w-[25%]">
-               <label className="block text-sm font-medium mt-2">
-                  Start date
-               </label>
-               <input
+            {dateRange === "Custom" && (
+               <>
+                  <div className="w-[25%]">
+                     <label className="block text-sm font-medium mt-2">
+                        Start date
+                     </label>
+                     <input
+                        data-theme="mintlify"
+                        type="date"
+                        className={`input input-bordered w-full mt-1`}
+                        value={""}
+                        disabled={false}
+                        onChange={() => {}}
+                     />
+                  </div>
+                  <div className="w-[25%]">
+                     <label className="block text-sm font-medium mt-2">
+                        End date
+                     </label>
+                     <input
+                        data-theme="mintlify"
+                        type="date"
+                        className={`input input-bordered w-full mt-1`}
+                        value={""}
+                        disabled={false}
+                        onChange={() => {}}
+                     />
+                  </div>
+               </>
+            )}
+            <div className={`w-[10%]`}>
+               <button
                   data-theme="mintlify"
-                  type="date"
-                  className={`input input-bordered w-full mt-1`}
-                  value={""}
+                  className="btn btn-primary mt-8 w-full"
+                  onClick={() => alert("Ready!")}
                   disabled={false}
-                  onChange={() => {}}
-               />
-            </div>
-            <div className="w-[25%]">
-               <label className="block text-sm font-medium mt-2">
-                  End date
-               </label>
-               <input
-                  data-theme="mintlify"
-                  type="date"
-                  className={`input input-bordered w-full mt-1`}
-                  value={""}
-                  disabled={false}
-                  onChange={() => {}}
-               />
+               >
+                  Apply
+               </button>
             </div>
          </div>
          <div className="flex gap-4 mt-5">
