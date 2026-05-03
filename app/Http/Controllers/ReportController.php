@@ -10,6 +10,11 @@ use Illuminate\Support\Carbon;
 
 class ReportController extends Controller
 {
+    /**
+     * Pagination limit for products per page
+     */
+    private const SALES_PER_PAGE = 5;
+
     function loadPage() {
         return inertia('reports/Reports');
     }
@@ -33,7 +38,13 @@ class ReportController extends Controller
         if (!$storeId) {
             return response()->json([
                 'data' => [
-                    'sales' => [],
+                    'sales' => [
+                        'data' => [],
+                        'current_page' => 1,
+                        'total' => 0,
+                        'last_page' => 1,
+                        'per_page' => self::SALES_PER_PAGE,
+                    ],
                     'summary' => [
                         'total_sales' => 0,
                         'total_cost' => 0,
@@ -80,9 +91,11 @@ class ReportController extends Controller
         $salesQuery = $applyDateFilter($salesQuery, 'created_at');
 
         // Query1: Fetch the sales records with pagination (to improve)
+        // Paginate products with selected columns for performance.
+        // Laravel's paginate() uses the 'page' query parameter (e.g., ?page=2),
+        // defaulting to page 1, and returns pagination metadata.
         $sales = $salesQuery
             ->select([
-                'id',
                 'uuid',
                 'created_at',
                 'payment_method',
@@ -91,7 +104,7 @@ class ReportController extends Controller
                 'change_amount',
             ])
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(self::SALES_PER_PAGE);
 
         // Query2: Calculate total sales amount for the filtered records
         $totalSales = $salesQuery->sum('total_amount');

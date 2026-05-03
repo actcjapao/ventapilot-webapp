@@ -2,13 +2,16 @@ import MainPanelLayout from "@/components/MainPanelLayout";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import StatusCard from "./StatusCard";
-import { SaleRecord, Summary } from "./types";
+import { PaginatedSale, Sale, Summary } from "./types";
+import { Link } from "@inertiajs/react";
 
 const Reports = () => {
    const [dateRange, setDateRange] = useState<string>("Today");
    const [customStartDate, setCustomStartDate] = useState<string>("");
    const [customEndDate, setCustomEndDate] = useState<string>("");
-   const [sales, setSales] = useState<SaleRecord[]>([]);
+   const [paginatedSales, setPaginatedSales] = useState<PaginatedSale | null>(
+      null,
+   );
    const [summary, setSummary] = useState<Summary>({
       total_sales: 0,
       total_cost: 0,
@@ -16,6 +19,7 @@ const Reports = () => {
    });
    const [isLoading, setIsLoading] = useState<boolean>(false);
    const [fetchError, setFetchError] = useState<string>("");
+   const [queryParams, setQueryParams] = useState<string>("");
 
    // Reinitialize FlyonUI when component mounts
    // Without this, the modal won't work when navigating to this page via Inertia links
@@ -40,26 +44,33 @@ const Reports = () => {
       return date.toLocaleDateString();
    };
 
-   const fetchReports = async () => {
+   const applyClickHandler = () => {
       if (dateRange === "Custom" && (!customStartDate || !customEndDate)) {
          setFetchError("Please select both start and end dates.");
          return;
       }
 
+      let query = `date_range=${encodeURIComponent(dateRange)}`;
+      if (dateRange === "Custom") {
+         query += `&start_date=${encodeURIComponent(customStartDate)}`;
+         query += `&end_date=${encodeURIComponent(customEndDate)}`;
+      }
+      setQueryParams(query);
+      fetchReports(query);
+   };
+
+   const fetchReports = async (query: string, url: string = "/api/reports") => {
       setIsLoading(true);
       setFetchError("");
 
+      // If the URL already has query parameters (e.g., ?page=2), we need to append with '&' instead of '?'
+      const paramOperator =
+         url.includes("?") || url.includes("?page") ? "&" : "?";
       try {
-         let query = `?date_range=${encodeURIComponent(dateRange)}`;
-         if (dateRange === "Custom") {
-            query += `&start_date=${encodeURIComponent(customStartDate)}`;
-            query += `&end_date=${encodeURIComponent(customEndDate)}`;
-         }
-
-         const response = await axios.get(`/api/reports${query}`);
+         const response = await axios.get(`${url}${paramOperator}${query}`);
          const data = response.data?.data;
 
-         setSales(data?.sales ?? []);
+         setPaginatedSales(data);
          setSummary(
             data?.summary ?? {
                total_sales: 0,
@@ -69,7 +80,7 @@ const Reports = () => {
          );
       } catch (error) {
          console.error("Error fetching report data:", error);
-         setSales([]);
+         setPaginatedSales(null);
          setSummary({ total_sales: 0, total_cost: 0, total_profit: 0 });
          setFetchError("Unable to load report data. Please try again.");
       } finally {
@@ -88,12 +99,17 @@ const Reports = () => {
    };
 
    useEffect(() => {
-      fetchReports();
+      fetchReports(`?date_range=${encodeURIComponent(dateRange)}`);
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, []);
 
    const isApplyDisabled =
       dateRange === "Custom" && (!customStartDate || !customEndDate);
+
+   const navigatePagination = (navigationUrl: string | null) => {
+      // if navigationUrl is null, the url will fallback to the default value
+      fetchReports(queryParams, navigationUrl || undefined);
+   };
 
    return (
       <>
@@ -146,7 +162,7 @@ const Reports = () => {
                <button
                   data-theme="mintlify"
                   className="btn btn-primary mt-9 w-full"
-                  onClick={fetchReports}
+                  onClick={applyClickHandler}
                   disabled={isApplyDisabled || isLoading}
                >
                   {isLoading ? "Loading..." : "Apply"}
@@ -207,7 +223,8 @@ const Reports = () => {
                         </tr>
                      </thead>
                      <tbody>
-                        {sales.length === 0 ? (
+                        {paginatedSales === null ||
+                        paginatedSales?.sales?.data.length === 0 ? (
                            <tr>
                               <td colSpan={6} className="text-center py-8">
                                  {isLoading
@@ -216,8 +233,8 @@ const Reports = () => {
                               </td>
                            </tr>
                         ) : (
-                           sales.map((record) => (
-                              <tr key={record.id}>
+                           paginatedSales?.sales?.data.map((record: Sale) => (
+                              <tr key={record.uuid}>
                                  <td>{formatDate(record.created_at)}</td>
                                  <td>
                                     {record.payment_method
@@ -234,7 +251,9 @@ const Reports = () => {
                                     <button
                                        className="btn btn-circle btn-text btn-sm"
                                        aria-label="View sale details"
-                                       onClick={() => {}}
+                                       onClick={() =>
+                                          alert("Ready to view sales details")
+                                       }
                                     >
                                        <span className="icon-[tabler--list-details] size-5"></span>
                                     </button>
@@ -246,6 +265,94 @@ const Reports = () => {
                   </table>
                </div>
             </div>
+            {/* Pagination */}
+            {paginatedSales !== null && paginatedSales.sales.last_page > 1 && (
+               <div className="flex items-center justify-between mt-2 pt-4 border-base-300">
+                  <div className="text-sm text-gray-500">
+                     Showing {paginatedSales?.sales.from} to{" "}
+                     {paginatedSales?.sales.to} of {paginatedSales?.sales.total}{" "}
+                     products
+                  </div>
+
+                  <div className="flex gap-2">
+                     {/* Previous Button */}
+                     {paginatedSales.sales.prev_page_url ? (
+                        <button
+                           className="btn btn-sm btn-outline"
+                           onClick={() =>
+                              navigatePagination(
+                                 paginatedSales.sales.prev_page_url,
+                              )
+                           }
+                        >
+                           <span className="icon-[tabler--chevron-left] size-4"></span>
+                           Previous
+                        </button>
+                     ) : (
+                        <button
+                           className="btn btn-sm btn-outline opacity-50 cursor-not-allowed"
+                           disabled
+                        >
+                           <span className="icon-[tabler--chevron-left] size-4"></span>
+                           Previous
+                        </button>
+                     )}
+
+                     {/* Page Numbers */}
+                     <div className="flex gap-1">
+                        {paginatedSales.sales.links.map((link, idx) => {
+                           // Skip the first and last links (prev/next)
+                           if (
+                              link.label.includes("Previous") ||
+                              link.label.includes("Next") ||
+                              link.label === "&laquo;" ||
+                              link.label === "&raquo;"
+                           ) {
+                              return null;
+                           }
+
+                           return (
+                              <Link
+                                 key={idx}
+                                 href={link.url || "#"}
+                                 className={`btn btn-sm ${
+                                    link.active
+                                       ? "custom-primary"
+                                       : "btn-outline"
+                                 }`}
+                                 preserveScroll
+                              >
+                                 {link.label}
+                              </Link>
+                           );
+                        })}
+                     </div>
+
+                     {/* Next Button */}
+                     {paginatedSales.sales.next_page_url ? (
+                        <button
+                           className="btn btn-sm btn-outline"
+                           onClick={() =>
+                              navigatePagination(
+                                 paginatedSales.sales.next_page_url,
+                              )
+                           }
+                        >
+                           Next
+                           <span className="icon-[tabler--chevron-right] size-4"></span>
+                        </button>
+                     ) : (
+                        <button
+                           className="btn btn-sm btn-outline opacity-50 cursor-not-allowed"
+                           disabled
+                        >
+                           Next
+                           <span className="icon-[tabler--chevron-right] size-4"></span>
+                        </button>
+                     )}
+                  </div>
+               </div>
+            )}
          </div>
       </>
    );

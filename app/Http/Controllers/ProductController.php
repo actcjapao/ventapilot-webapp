@@ -42,8 +42,9 @@ class ProductController extends Controller
             ]);
         }
         
-        // Paginate products with only needed columns
-        // Laravel automatically uses the 'page' query parameter (e.g., ?page=2) for pagination
+        // Paginate products with selected columns for performance.
+        // Laravel's paginate() uses the 'page' query parameter (e.g., ?page=2),
+        // defaulting to page 1, and returns pagination metadata.
         $products = Product::where('store_id', $storeId)
                         ->select([
                             'id', 'uuid', 'store_id',
