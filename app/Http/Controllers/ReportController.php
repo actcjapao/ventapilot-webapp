@@ -90,11 +90,15 @@ class ReportController extends Controller
         // Apply the date filter to the sales base query
         $salesQuery = $applyDateFilter($salesQuery, 'created_at');
 
+        // Clone BEFORE paginate so that it will properly calculate the summaries
+        $salesPaginationQuery = clone $salesQuery;
+        $salesSummaryQuery = clone $salesQuery;
+
         // Query1: Fetch the sales records with pagination (to improve)
         // Paginate products with selected columns for performance.
         // Laravel's paginate() uses the 'page' query parameter (e.g., ?page=2),
         // defaulting to page 1, and returns pagination metadata.
-        $sales = $salesQuery
+        $sales = $salesPaginationQuery
             ->select([
                 'uuid',
                 'created_at',
@@ -105,9 +109,9 @@ class ReportController extends Controller
             ])
             ->orderByDesc('created_at')
             ->paginate(self::SALES_PER_PAGE);
-
+                    
         // Query2: Calculate total sales amount for the filtered records
-        $totalSales = $salesQuery->sum('total_amount');
+        $totalSales = $salesSummaryQuery->sum('total_amount');
 
         // Calculate total cost for the filtered sales records
         $totalCost = DB::table('sale_items')

@@ -3,7 +3,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import StatusCard from "./StatusCard";
 import { PaginatedSale, Sale, Summary } from "./types";
-import { Link } from "@inertiajs/react";
 
 const Reports = () => {
    const [dateRange, setDateRange] = useState<string>("Today");
@@ -312,18 +311,13 @@ const Reports = () => {
                            }
 
                            return (
-                              <Link
+                              <button
                                  key={idx}
-                                 href={link.url || "#"}
-                                 className={`btn btn-sm ${
-                                    link.active
-                                       ? "custom-primary"
-                                       : "btn-outline"
-                                 }`}
-                                 preserveScroll
+                                 className={`btn btn-sm btn-outline ${link.active ? "custom-primary" : ""}`}
+                                 onClick={() => navigatePagination(link.url)}
                               >
                                  {link.label}
-                              </Link>
+                              </button>
                            );
                         })}
                      </div>
