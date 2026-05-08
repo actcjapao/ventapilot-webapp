@@ -2,6 +2,7 @@ import React from "react";
 
 type StatCardProps = {
    label: string;
+   isLoading: boolean;
    value: string;
    icon: string; // Tabler icon class
    colorClasses: string; // e.g. "bg-warning/20 text-warning"
@@ -10,6 +11,7 @@ type StatCardProps = {
 
 const StatusCard: React.FC<StatCardProps> = ({
    label,
+   isLoading,
    value,
    icon,
    colorClasses,
@@ -43,7 +45,7 @@ const StatusCard: React.FC<StatCardProps> = ({
 
             {/* Value */}
             <span className="text-base-content text-2xl font-semibold">
-               {value}
+               {isLoading ? <div className="skeleton h-8 w-30"></div> : value}
             </span>
          </div>
       </div>

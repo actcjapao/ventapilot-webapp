@@ -59,6 +59,7 @@ const Reports = () => {
    };
 
    const fetchReports = async (query: string, url: string = "/api/reports") => {
+      setPaginatedSales(null);
       setIsLoading(true);
       setFetchError("");
 
@@ -109,6 +110,36 @@ const Reports = () => {
       // if navigationUrl is null, the url will fallback to the default value
       fetchReports(queryParams, navigationUrl || undefined);
    };
+
+   function SalesSkeletonRow() {
+      return (
+         <tr>
+            <td className="py-3">
+               <div className="skeleton h-4 w-25"></div>
+            </td>
+
+            <td className="py-3">
+               <div className="skeleton h-4 w-20"></div>
+            </td>
+
+            <td className="py-3">
+               <div className="skeleton h-4 w-15"></div>
+            </td>
+
+            <td className="py-3">
+               <div className="skeleton h-4 w-15"></div>
+            </td>
+
+            <td className="py-3">
+               <div className="skeleton h-4 w-15"></div>
+            </td>
+
+            <td className="py-3 text-right">
+               <div className="skeleton h-8 w-8 rounded-full ml-auto"></div>
+            </td>
+         </tr>
+      );
+   }
 
    return (
       <>
@@ -180,6 +211,7 @@ const Reports = () => {
             <div className="w-[33%]">
                <StatusCard
                   label="Sales"
+                  isLoading={isLoading}
                   value={formatCurrency(summary.total_sales)}
                   icon="icon-[tabler--currency-dollar]"
                   colorClasses="text-warning bg-warning/20"
@@ -189,6 +221,7 @@ const Reports = () => {
             <div className="w-[33%]">
                <StatusCard
                   label="Cost"
+                  isLoading={isLoading}
                   value={formatCurrency(summary.total_cost)}
                   icon="icon-[tabler--wallet]"
                   colorClasses="text-accent bg-accent/20"
@@ -198,6 +231,7 @@ const Reports = () => {
             <div className="w-[33%]">
                <StatusCard
                   label="Profit"
+                  isLoading={isLoading}
                   value={formatCurrency(summary.total_profit)}
                   icon="icon-[tabler--chart-bar]"
                   colorClasses="text-success bg-success/20"
@@ -224,13 +258,20 @@ const Reports = () => {
                      <tbody>
                         {paginatedSales === null ||
                         paginatedSales?.sales?.data.length === 0 ? (
-                           <tr>
-                              <td colSpan={6} className="text-center py-8">
-                                 {isLoading
-                                    ? "Loading sales records..."
-                                    : "No sales records found for the selected date range."}
-                              </td>
-                           </tr>
+                           <>
+                              {isLoading ? (
+                                 Array.from({ length: 5 }).map((_, i) => (
+                                    <SalesSkeletonRow key={i} />
+                                 ))
+                              ) : (
+                                 <tr>
+                                    <div className="text-center py-8">
+                                       No sales records found for the selected
+                                       date range.
+                                    </div>
+                                 </tr>
+                              )}
+                           </>
                         ) : (
                            paginatedSales?.sales?.data.map((record: Sale) => (
                               <tr key={record.uuid}>
