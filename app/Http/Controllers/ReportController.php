@@ -13,7 +13,7 @@ class ReportController extends Controller
     /**
      * Pagination limit for products per page
      */
-    private const SALES_PER_PAGE = 5;
+    private const SALES_PER_PAGE = 10;
 
     function loadPage() {
         return inertia('reports/Reports');
@@ -107,7 +107,7 @@ class ReportController extends Controller
                 'payment_amount',
                 'change_amount',
             ])
-            ->orderByDesc('created_at')
+            ->orderBy('created_at')
             ->paginate(self::SALES_PER_PAGE);
                     
         // Query2: Calculate total sales amount for the filtered records
