@@ -11,6 +11,11 @@ type ProductsPageProps = {
    products: Paginator<Product>;
 };
 
+const ITEM_TYPES = {
+   PER_ITEM: "per_item",
+   WHOLE_ITEM: "whole_item",
+} as const;
+
 const Products = ({ store_id, products }: ProductsPageProps) => {
    const { flash } = usePage<PageProps>().props;
    const [tagInput, setTagInput] = useState("");
@@ -29,6 +34,12 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
 
    const [mode, setMode] = useState<"add" | "edit">("add");
    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+   const [itemType, setItemType] = useState<
+      (typeof ITEM_TYPES)[keyof typeof ITEM_TYPES]
+   >(ITEM_TYPES.PER_ITEM);
+   const [wholeItemCostPrice, setWholeItemCostPrice] = useState<string>("");
+   const [pieces, setPieces] = useState<string>("");
+   const [calculatedProfit, setCalculatedProfit] = useState<string>("");
 
    // Reinitialize FlyonUI when component mounts
    // Without this, the modal won't work when navigating to this page via Inertia links
@@ -126,6 +137,150 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
 
    type FormFields = keyof typeof errors;
    const hasError = (field: FormFields) => Boolean(errors[field]);
+
+   const itemTypeOnChangeHandler: React.ChangeEventHandler<HTMLInputElement> = (
+      e,
+   ) => {
+      const value = e.target
+         .value as (typeof ITEM_TYPES)[keyof typeof ITEM_TYPES];
+      setItemType(value);
+   };
+
+   /**
+    * Allows:
+    * - empty string
+    * - integers
+    * - decimals up to 2 places
+    *
+    * Examples:
+    * "", "1", "1.", "1.2", "1.23"
+    */
+   const decimalRegex = /^\d*\.?\d{0,2}$/;
+
+   /**
+    * Higher-order function that returns an onChange handler for decimal inputs.
+    */
+   const handleDecimalInput =
+      (
+         setter: React.Dispatch<React.SetStateAction<string>>,
+      ): React.ChangeEventHandler<HTMLInputElement> =>
+      (e) => {
+         const value = e.target.value;
+
+         if (value === "") {
+            setter("");
+            return;
+         }
+
+         if (!decimalRegex.test(value)) {
+            return;
+         }
+
+         setter(value);
+      };
+
+   /**
+    * Normalize input to have at most 2 decimal places on blur.
+    * If input is invalid (e.g. negative number, non-numeric), reset to empty string.
+    * This ensures that even if the user pastes an invalid value, it will be corrected on blur.
+    */
+   const normalizeToTwoDecimals = (
+      value: string,
+      setter: React.Dispatch<React.SetStateAction<string>>,
+   ) => {
+      if (value === "") return;
+
+      const parsed = Number(value);
+
+      if (isNaN(parsed) || parsed < 0) {
+         setter("");
+         return;
+      }
+
+      setter(parsed.toFixed(2));
+   };
+
+   const wholeItemCostPriceOnChangeHandler = handleDecimalInput(
+      setWholeItemCostPrice,
+   );
+   const piecesOnChangeHandler = handleDecimalInput(setPieces);
+
+   const sellingPriceOnChangeHandler: React.ChangeEventHandler<
+      HTMLInputElement
+   > = (e) => {
+      const value = e.target.value;
+
+      // allow clearing
+      if (value === "") {
+         setData("selling_price", "");
+         clearErrors("selling_price");
+         return;
+      }
+
+      // reject invalid decimal input
+      if (!decimalRegex.test(value)) {
+         return;
+      }
+
+      setData("selling_price", value);
+      clearErrors("selling_price");
+   };
+
+   const wholeItemCostPriceOnBlurHandler: React.FocusEventHandler<
+      HTMLInputElement
+   > = () => {
+      normalizeToTwoDecimals(wholeItemCostPrice, setWholeItemCostPrice);
+
+      if (pieces !== "") {
+         calculatePerItemCostPrice();
+      }
+   };
+
+   const piecesOnBlurHandler: React.FocusEventHandler<
+      HTMLInputElement
+   > = () => {
+      normalizeToTwoDecimals(pieces, setPieces);
+
+      if (wholeItemCostPrice !== "") {
+         calculatePerItemCostPrice();
+      }
+   };
+
+   const sellingPriceOnBlurHandler: React.FocusEventHandler<
+      HTMLInputElement
+   > = () => {
+      if (data.selling_price === "") return;
+      const normalized = Number(data.selling_price).toFixed(2);
+      setData("selling_price", normalized);
+
+      calculatePerItemCostPrice();
+   };
+
+   /**
+    * Calculates:
+    * - cost price per item
+    * - profit based on selling price
+    */
+   const calculatePerItemCostPrice = () => {
+      const wholeCost = Number(wholeItemCostPrice);
+      const piecesCount = Number(pieces);
+
+      if (!wholeCost || !piecesCount) {
+         setData("cost_price", "");
+         setCalculatedProfit("0.00");
+         return;
+      }
+
+      const perItemCost = wholeCost / piecesCount;
+      const normalizedPerItemCost = perItemCost.toFixed(2);
+
+      const sellingPrice = Number(data.selling_price || 0);
+      const profit = sellingPrice - perItemCost;
+      const normalizedProfit = profit > 0 ? profit.toFixed(2) : "0.00";
+
+      setData("cost_price", normalizedPerItemCost);
+      setCalculatedProfit(normalizedProfit);
+   };
 
    return (
       <>
@@ -457,124 +612,264 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                               </p>
                            )}
                         </div>
-                        <div className="w-full space-y-2">
-                           <label
-                              className="label-text font-medium"
-                              htmlFor="stock_quantity"
-                           >
-                              Stock Qty
-                           </label>
-                           <input
-                              id="stock_quantity"
-                              data-theme="mintlify"
-                              type="text"
-                              className={`input w-full ${hasError("stock_quantity") ? "is-invalid" : ""}`}
-                              value={data.stock_quantity}
-                              onChange={(e) => {
-                                 setData("stock_quantity", e.target.value);
-                                 clearErrors("stock_quantity");
-                              }}
-                           />
-                           {hasError("stock_quantity") && (
-                              <p className="mt-1 text-sm text-red-500">
-                                 {errors.stock_quantity}
-                              </p>
-                           )}
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                           <div className="space-y-2">
-                              <label
-                                 className="label-text font-medium"
-                                 htmlFor="cost_price"
-                              >
-                                 Cost Price
-                              </label>
+
+                        <div className="w-full space-y-2 my-4">
+                           <div className="flex items-center gap-1">
                               <input
-                                 id="cost_price"
                                  data-theme="mintlify"
-                                 type="text"
-                                 className={`input w-full ${hasError("cost_price") ? "is-invalid" : ""}`}
-                                 value={data.cost_price}
-                                 onChange={(e) => {
-                                    setData("cost_price", e.target.value);
-                                    clearErrors("cost_price");
-                                 }}
+                                 type="radio"
+                                 name="item_type"
+                                 value="per_item"
+                                 id="itemTypeRadio1"
+                                 className="radio radio-primary"
+                                 checked={itemType === "per_item"}
+                                 onChange={(e) => itemTypeOnChangeHandler(e)}
                               />
-                              {hasError("cost_price") && (
-                                 <p className="mt-1 text-sm text-red-500">
-                                    {errors.cost_price}
-                                 </p>
-                              )}
-                           </div>
-                           <div className="space-y-2">
-                              <label
-                                 className="label-text font-medium"
-                                 htmlFor="selling_price"
-                              >
-                                 Selling Price
-                              </label>
+                              <label htmlFor="itemTypeRadio1">Per Item</label>
+
                               <input
-                                 id="selling_price"
                                  data-theme="mintlify"
-                                 type="text"
-                                 className={`input w-full ${hasError("selling_price") ? "is-invalid" : ""}`}
-                                 value={data.selling_price}
-                                 onChange={(e) => {
-                                    setData("selling_price", e.target.value);
-                                    clearErrors("selling_price");
-                                 }}
+                                 type="radio"
+                                 name="item_type"
+                                 value="whole_item"
+                                 id="itemTypeRadio2"
+                                 className="radio radio-primary ms-3"
+                                 checked={itemType === "whole_item"}
+                                 onChange={(e) => itemTypeOnChangeHandler(e)}
                               />
-                              {hasError("selling_price") && (
-                                 <p className="mt-1 text-sm text-red-500">
-                                    {errors.selling_price}
-                                 </p>
-                              )}
+                              <label htmlFor="itemTypeRadio2">Whole Item</label>
                            </div>
                         </div>
-                        {/* Tags Field */}
-                        <div className="w-full space-y-2 mt-4">
-                           <label className="label-text" htmlFor="tags">
-                              <span className="font-medium">Tags</span>
-                              <span> (optional)</span>
-                           </label>
 
-                           {/* Input */}
-                           <input
-                              id="tags"
-                              type="text"
-                              data-theme="mintlify"
-                              className="input input-bordered w-full"
-                              placeholder="Type tag and press Enter"
-                              value={tagInput}
-                              onChange={(e) => setTagInput(e.target.value)}
-                              onKeyDown={handleTagKeyDown}
-                           />
-
-                           {/* Pills */}
-                           <div className="flex flex-wrap gap-2 mb-2">
-                              {data.tags.map((tag: string) => (
-                                 <span
-                                    key={tag}
-                                    className="badge badge-primary badge-soft flex items-center gap-1 px-3 py-2"
+                        {itemType === ITEM_TYPES.PER_ITEM ? (
+                           <>
+                              <div className="w-full space-y-2">
+                                 <label
+                                    className="label-text font-medium"
+                                    htmlFor="stock_quantity"
                                  >
-                                    {tag}
-                                    <button
-                                       type="button"
-                                       onClick={() => removeTag(tag)}
-                                       className="ml-1"
+                                    Stock Qty
+                                 </label>
+                                 <input
+                                    id="stock_quantity"
+                                    data-theme="mintlify"
+                                    type="text"
+                                    className={`input w-full ${hasError("stock_quantity") ? "is-invalid" : ""}`}
+                                    value={data.stock_quantity}
+                                    onChange={(e) => {
+                                       setData(
+                                          "stock_quantity",
+                                          e.target.value,
+                                       );
+                                       clearErrors("stock_quantity");
+                                    }}
+                                 />
+                                 {hasError("stock_quantity") && (
+                                    <p className="mt-1 text-sm text-red-500">
+                                       {errors.stock_quantity}
+                                    </p>
+                                 )}
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="cost_price"
                                     >
-                                       <span className="icon-[tabler--x] size-3"></span>
-                                    </button>
-                                 </span>
-                              ))}
-                           </div>
+                                       Cost Price
+                                    </label>
+                                    <input
+                                       id="cost_price"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("cost_price") ? "is-invalid" : ""}`}
+                                       value={data.cost_price}
+                                       onChange={(e) => {
+                                          setData("cost_price", e.target.value);
+                                          clearErrors("cost_price");
+                                       }}
+                                    />
+                                    {hasError("cost_price") && (
+                                       <p className="mt-1 text-sm text-red-500">
+                                          {errors.cost_price}
+                                       </p>
+                                    )}
+                                 </div>
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="selling_price"
+                                    >
+                                       Selling Price
+                                    </label>
+                                    <input
+                                       id="selling_price"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("selling_price") ? "is-invalid" : ""}`}
+                                       value={data.selling_price}
+                                       onChange={(e) => {
+                                          setData(
+                                             "selling_price",
+                                             e.target.value,
+                                          );
+                                          clearErrors("selling_price");
+                                       }}
+                                    />
+                                    {hasError("selling_price") && (
+                                       <p className="mt-1 text-sm text-red-500">
+                                          {errors.selling_price}
+                                       </p>
+                                    )}
+                                 </div>
+                              </div>
+                              {/* Tags Field */}
+                              <div className="w-full space-y-2 mt-4">
+                                 <label className="label-text" htmlFor="tags">
+                                    <span className="font-medium">Tags</span>
+                                    <span> (optional)</span>
+                                 </label>
 
-                           {errors.tags && (
-                              <p className="text-sm text-red-500 mt-1">
-                                 {errors.tags}
-                              </p>
-                           )}
-                        </div>
+                                 {/* Input */}
+                                 <input
+                                    id="tags"
+                                    type="text"
+                                    data-theme="mintlify"
+                                    className="input input-bordered w-full"
+                                    placeholder="Type tag and press Enter"
+                                    value={tagInput}
+                                    onChange={(e) =>
+                                       setTagInput(e.target.value)
+                                    }
+                                    onKeyDown={handleTagKeyDown}
+                                 />
+
+                                 {/* Pills */}
+                                 <div className="flex flex-wrap gap-2 mb-2">
+                                    {data.tags.map((tag: string) => (
+                                       <span
+                                          key={tag}
+                                          className="badge badge-primary badge-soft flex items-center gap-1 px-3 py-2"
+                                       >
+                                          {tag}
+                                          <button
+                                             type="button"
+                                             onClick={() => removeTag(tag)}
+                                             className="ml-1"
+                                          >
+                                             <span className="icon-[tabler--x] size-3"></span>
+                                          </button>
+                                       </span>
+                                    ))}
+                                 </div>
+
+                                 {errors.tags && (
+                                    <p className="text-sm text-red-500 mt-1">
+                                       {errors.tags}
+                                    </p>
+                                 )}
+                              </div>
+                           </>
+                        ) : (
+                           <>
+                              <div className="grid grid-cols-2 gap-4">
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="whole_item_cost_price"
+                                    >
+                                       Whole Item Cost Price
+                                    </label>
+                                    <input
+                                       id="whole_item_cost_price"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("cost_price") ? "is-invalid" : ""}`}
+                                       value={wholeItemCostPrice}
+                                       onChange={(e) =>
+                                          wholeItemCostPriceOnChangeHandler(e)
+                                       }
+                                       onBlur={wholeItemCostPriceOnBlurHandler}
+                                    />
+                                 </div>
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="pieces"
+                                    >
+                                       Pieces
+                                    </label>
+                                    <input
+                                       id="pieces"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("selling_price") ? "is-invalid" : ""}`}
+                                       value={pieces}
+                                       onChange={(e) =>
+                                          piecesOnChangeHandler(e)
+                                       }
+                                       onBlur={piecesOnBlurHandler}
+                                    />
+                                 </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="per_item_cost_price"
+                                    >
+                                       Per Item Cost Price
+                                    </label>
+                                    <input
+                                       id="per_item_cost_price"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("cost_price") ? "is-invalid" : ""}`}
+                                       value={data.cost_price}
+                                    />
+                                 </div>
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="selling_price"
+                                    >
+                                       Selling Price
+                                    </label>
+                                    <input
+                                       id="selling_price"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("selling_price") ? "is-invalid" : ""}`}
+                                       value={data.selling_price}
+                                       onChange={sellingPriceOnChangeHandler}
+                                       onBlur={sellingPriceOnBlurHandler}
+                                    />
+                                    {hasError("selling_price") && (
+                                       <p className="mt-1 text-sm text-red-500">
+                                          {errors.selling_price}
+                                       </p>
+                                    )}
+                                 </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                 <div className="space-y-2">
+                                    <label
+                                       className="label-text font-medium"
+                                       htmlFor="profit"
+                                    >
+                                       Estimated Profit
+                                    </label>
+                                    <input
+                                       id="profit"
+                                       data-theme="mintlify"
+                                       type="text"
+                                       className={`input w-full ${hasError("selling_price") ? "is-invalid" : ""}`}
+                                       value={calculatedProfit}
+                                    />
+                                 </div>
+                              </div>
+                           </>
+                        )}
                      </form>
                   </div>
 
