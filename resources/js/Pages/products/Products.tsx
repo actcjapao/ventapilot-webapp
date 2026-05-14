@@ -611,33 +611,39 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                            )}
                         </div>
 
-                        <div className="w-full space-y-2 my-4">
-                           <div className="flex items-center gap-1">
-                              <input
-                                 data-theme="mintlify"
-                                 type="radio"
-                                 name="item_type"
-                                 value="per_item"
-                                 id="itemTypeRadio1"
-                                 className="radio radio-primary"
-                                 checked={itemType === "per_item"}
-                                 onChange={(e) => itemTypeOnChangeHandler(e)}
-                              />
-                              <label htmlFor="itemTypeRadio1">Per Item</label>
+                        {mode === "add" && (
+                           <div className="w-full space-y-2 my-4">
+                              <div className="flex items-center gap-1">
+                                 <input
+                                    data-theme="mintlify"
+                                    type="radio"
+                                    name="item_type"
+                                    value="per_item"
+                                    id="itemTypeRadio1"
+                                    className="radio radio-primary"
+                                    checked={itemType === "per_item"}
+                                    onChange={(e) => itemTypeOnChangeHandler(e)}
+                                 />
+                                 <label htmlFor="itemTypeRadio1">
+                                    Per Item
+                                 </label>
 
-                              <input
-                                 data-theme="mintlify"
-                                 type="radio"
-                                 name="item_type"
-                                 value="whole_item"
-                                 id="itemTypeRadio2"
-                                 className="radio radio-primary ms-3"
-                                 checked={itemType === "whole_item"}
-                                 onChange={(e) => itemTypeOnChangeHandler(e)}
-                              />
-                              <label htmlFor="itemTypeRadio2">Whole Item</label>
+                                 <input
+                                    data-theme="mintlify"
+                                    type="radio"
+                                    name="item_type"
+                                    value="whole_item"
+                                    id="itemTypeRadio2"
+                                    className="radio radio-primary ms-3"
+                                    checked={itemType === "whole_item"}
+                                    onChange={(e) => itemTypeOnChangeHandler(e)}
+                                 />
+                                 <label htmlFor="itemTypeRadio2">
+                                    Whole Item
+                                 </label>
+                              </div>
                            </div>
-                        </div>
+                        )}
 
                         {itemType === ITEM_TYPES.PER_ITEM ? (
                            <>
