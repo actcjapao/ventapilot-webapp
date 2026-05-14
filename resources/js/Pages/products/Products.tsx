@@ -112,6 +112,11 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
       setMode("add");
       setSelectedProduct(null);
       clearErrors(); // clear validation errors
+
+      // Reset whole_item mode states
+      setItemType(ITEM_TYPES.PER_ITEM);
+      setWholeItemCostPrice("");
+      setPieces("");
    };
 
    const openEditProductModal = (product: Product) => {
@@ -119,6 +124,11 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
       setMode("edit");
       setSelectedProduct(product);
       clearErrors(); // clear validation errors
+
+      // Reset whole_item mode states to defaults
+      setItemType(ITEM_TYPES.PER_ITEM);
+      setWholeItemCostPrice("");
+      setPieces("");
 
       setData((prev) => ({
          ...prev,
