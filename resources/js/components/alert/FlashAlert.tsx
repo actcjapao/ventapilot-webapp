@@ -2,7 +2,12 @@ import Theme from "@/types/Theme.type";
 import normalizeThemeType from "@/utils/normalizeThemeType";
 import { useEffect, useState } from "react";
 
-const FlashAlert = ({ type, message }: { type: Theme; message: string }) => {
+export interface FlashAlertProps {
+   type: Theme;
+   message: string;
+}
+
+const FlashAlert = ({ type, message }: FlashAlertProps) => {
    const [visible, setVisible] = useState<boolean>(true);
 
    useEffect(() => {

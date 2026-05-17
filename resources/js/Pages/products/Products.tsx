@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Product } from "./types";
 import { PageProps } from "@/types/PageProp.type";
 import { Paginator } from "@/types/Paginator.type";
-import FlashAlert from "@/components/alert/FlashAlert";
+import FlashAlert, { FlashAlertProps } from "@/components/alert/FlashAlert";
 import axios from "axios";
 
 type ProductsPageProps = {
@@ -20,6 +20,8 @@ const ITEM_TYPES = {
 const Products = ({ store_id, products }: ProductsPageProps) => {
    const { flash } = usePage<PageProps>().props;
    const [tagInput, setTagInput] = useState("");
+   const [productsState, setProductsState] =
+      useState<Paginator<Product>>(products);
    const { data, setData, post, processing, errors, clearErrors, reset } =
       useForm({
          product_uuid: "",
@@ -52,6 +54,11 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
          window.HSStaticMethods.autoInit();
       }
    }, []);
+
+   // Keep local products list in sync with server props (Inertia reloads)
+   useEffect(() => {
+      setProductsState(products);
+   }, [products]);
 
    const addTag = () => {
       const value = tagInput.trim().toLowerCase();
@@ -306,13 +313,32 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
    const openAddStockModal = (product: Product) => {
       setSelectedProductForAddStock(product);
    };
+   const [isAdditionalQuantityValid, setIsAdditionalQuantityValid] =
+      useState<boolean>(true);
    const [additionalQuantity, setAdditionalQuantity] = useState<string>("");
+   const [showStockUpdateAlert, setShowStockUpdateAlert] = useState<{
+      alertProps: FlashAlertProps;
+      show: boolean;
+   }>({
+      alertProps: {
+         type: "success",
+         message: "",
+      },
+      show: false,
+   });
 
    const updateStockHandler = async (product_uuid: string | undefined) => {
       if (product_uuid === undefined) return;
+      if (additionalQuantity.trim() === "") {
+         setIsAdditionalQuantityValid(false);
+         return;
+      }
 
       const parsedQuantity = parseInt(additionalQuantity);
-      if (parsedQuantity <= 0) return;
+      if (parsedQuantity <= 0) {
+         setIsAdditionalQuantityValid(false);
+         return;
+      }
 
       setIsUpdatingStock(true);
 
@@ -323,7 +349,32 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                quantity: parsedQuantity,
             },
          );
-         const updatedProduct = response.data?.data;
+         if (response.data?.success) {
+            const updatedProduct = response.data?.data;
+
+            // Show alert
+            setShowStockUpdateAlert({
+               alertProps: {
+                  type: "success",
+                  message: "Stock updated successfully!",
+               },
+               show: true,
+            });
+
+            // Update product list local state to reflect new stock quantity
+            setProductsState((prev) => ({
+               ...prev,
+               data: prev.data.map((p) =>
+                  p.uuid === updatedProduct.uuid
+                     ? { ...p, ...updatedProduct }
+                     : p,
+               ),
+            }));
+
+            if (selectedProductForAddStock?.uuid === updatedProduct.uuid) {
+               setSelectedProductForAddStock(updatedProduct);
+            }
+         }
 
          // Reset form state
          setAdditionalQuantity("");
@@ -334,9 +385,26 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                '[data-overlay="#stock-modal"]',
             ) as HTMLElement;
             closeButton?.click();
-         }, 800);
+
+            setShowStockUpdateAlert({
+               alertProps: { type: "success", message: "" },
+               show: false,
+            });
+         }, 2000);
       } catch (error) {
          console.error("Error updating product stock", error);
+         setShowStockUpdateAlert({
+            alertProps: { type: "error", message: "Failed to update stock." },
+            show: true,
+         });
+
+         // Close modal after showing success message
+         setTimeout(() => {
+            setShowStockUpdateAlert({
+               alertProps: { type: "success", message: "" },
+               show: false,
+            });
+         }, 2000);
       } finally {
          setIsUpdatingStock(false);
       }
@@ -380,8 +448,8 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                            </tr>
                         </thead>
                         <tbody>
-                           {products.data.length > 0 ? (
-                              products.data.map((product) => {
+                           {productsState.data.length > 0 ? (
+                              productsState.data.map((product) => {
                                  const stockValue = Number(
                                     product.stock_quantity,
                                  );
@@ -472,18 +540,18 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                </div>
 
                {/* Pagination */}
-               {products.last_page > 1 && (
+               {productsState.last_page > 1 && (
                   <div className="flex items-center justify-between mt-2 pt-4 border-base-300">
                      <div className="text-sm text-gray-500">
-                        Showing {products.from} to {products.to} of{" "}
-                        {products.total} products
+                        Showing {productsState.from} to {productsState.to} of{" "}
+                        {productsState.total} products
                      </div>
 
                      <div className="flex gap-2">
                         {/* Previous Button */}
-                        {products.prev_page_url ? (
+                        {productsState.prev_page_url ? (
                            <Link
-                              href={products.prev_page_url}
+                              href={productsState.prev_page_url}
                               className="btn btn-sm btn-outline"
                               preserveScroll
                            >
@@ -502,7 +570,7 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
 
                         {/* Page Numbers */}
                         <div className="flex gap-1">
-                           {products.links.map((link, idx) => {
+                           {productsState.links.map((link, idx) => {
                               // Skip the first and last links (prev/next)
                               if (
                                  link.label.includes("Previous") ||
@@ -531,9 +599,9 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                         </div>
 
                         {/* Next Button */}
-                        {products.next_page_url ? (
+                        {productsState.next_page_url ? (
                            <Link
-                              href={products.next_page_url}
+                              href={productsState.next_page_url}
                               className="btn btn-sm btn-outline"
                               preserveScroll
                            >
@@ -1015,6 +1083,13 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                   {/* Body */}
                   <div className="modal-body space-y-6 px-6 py-6">
                      {/* Product Details */}
+                     {showStockUpdateAlert.show && (
+                        <FlashAlert
+                           key={Math.random()}
+                           type={showStockUpdateAlert.alertProps.type}
+                           message={showStockUpdateAlert.alertProps.message}
+                        />
+                     )}
                      <section className="rounded-2xl border border-base-200 bg-base-50 p-4">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                            {/* Brand */}
@@ -1055,7 +1130,6 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                               </div>
                            </div>
                         </div>
-
                         {/* Description */}
                         <div className="mt-4 border-t border-base-200 pt-4">
                            <p className="text-xs uppercase tracking-wide text-base-content/50">
@@ -1158,12 +1232,20 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                               type="number"
                               min="1"
                               placeholder="Enter additional quantity"
-                              className="input input-bordered w-full"
+                              className={`input input-bordered w-full ${!isAdditionalQuantityValid ? "is-invalid" : ""}`}
                               value={additionalQuantity}
                               onChange={(
                                  e: React.ChangeEvent<HTMLInputElement>,
-                              ) => setAdditionalQuantity(e.target.value)}
+                              ) => {
+                                 setIsAdditionalQuantityValid(true);
+                                 setAdditionalQuantity(e.target.value);
+                              }}
                            />
+                           {!isAdditionalQuantityValid && (
+                              <p className="mt-1 text-sm text-red-500">
+                                 Please enter a valid and non-zero quantity.
+                              </p>
+                           )}
                         </div>
                      </section>
                   </div>
