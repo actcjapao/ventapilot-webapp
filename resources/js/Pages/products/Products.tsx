@@ -323,8 +323,18 @@ const Products = ({ store_id, products }: ProductsPageProps) => {
                quantity: parsedQuantity,
             },
          );
-         const data = response.data?.data;
-         console.log(data);
+         const updatedProduct = response.data?.data;
+
+         // Reset form state
+         setAdditionalQuantity("");
+
+         // Close modal after showing success message
+         setTimeout(() => {
+            const closeButton = document.querySelector(
+               '[data-overlay="#stock-modal"]',
+            ) as HTMLElement;
+            closeButton?.click();
+         }, 800);
       } catch (error) {
          console.error("Error updating product stock", error);
       } finally {

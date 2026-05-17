@@ -83,6 +83,10 @@ class ProductController extends Controller
         $product->stock_quantity += $request->input('quantity');
         $product->save();
 
-        return back()->with('success', 'Stock updated successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Stock updated successfully!',
+            'data' => $product
+        ]);
     }
 }
