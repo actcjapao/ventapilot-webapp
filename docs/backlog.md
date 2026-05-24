@@ -27,6 +27,13 @@ This will serve as my guide throughout the development, deployment, & monitoring
 
 ## Done Items
 
+## Server side pending works
+
+- [📝] Middleware non-authenticated user redirection
+- [📝] Clean other controllers with service-action architecture like dashboard
+- [📝] Create customre quests
+- [📝] Implement dashboard data filter weekly, monthly, and soon yearly
+
 sales
 -id
 -uuid
