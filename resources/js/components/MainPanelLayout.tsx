@@ -6,9 +6,28 @@ type MainPanelLayoutProps = {
    title?: string;
 };
 
+type AuthUser = {
+   token: string;
+   uuid: string;
+   name: string;
+   email: string;
+};
+
 const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
    const [sidebarOpen, setSidebarOpen] = useState(false);
-   const { url } = usePage(); // for active link detection
+
+   // Only props related to auth are typed here; url is excluded
+   const { url, props } = usePage<{ auth?: { user?: AuthUser | null } }>(); // for active link detection and page props
+   const user = props?.auth?.user ?? null;
+
+   const initials = (() => {
+      if (!user?.name) return "JD";
+      return user.name
+         .split(" ")
+         .map((n: string) => n[0])
+         .slice(0, 2)
+         .join("");
+   })();
 
    const navLinkClass = (path: string) =>
       `flex items-center gap-3 px-4 py-2 rounded-lg transition ${
@@ -105,10 +124,15 @@ const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
                   </div>
 
                   <div className="flex items-center gap-4">
-                     <span className="text-sm">John Doe</span>
-                     <div className="avatar placeholder">
-                        <div className="bg-primary text-primary-content rounded-full w-8">
-                           <span>JD</span>
+                     <span className="text-sm">{user?.name ?? "--"}</span>
+                     <div
+                        data-theme="mintlify"
+                        className="bg-transparent avatar avatar-placeholder"
+                     >
+                        <div className="bg-primary/10 text-primary size-8 rounded-full flex items-center justify-center">
+                           <span className="text-md uppercase pb-0.5">
+                              {initials}
+                           </span>
                         </div>
                      </div>
                   </div>
