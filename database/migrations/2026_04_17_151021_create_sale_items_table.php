@@ -17,6 +17,8 @@ return new class extends Migration
             
             $table->unsignedBigInteger('sale_id');
             $table->unsignedBigInteger('product_id');
+            $table->decimal('cost_price_at_sale', 10, 2)->default(0.00);
+            $table->decimal('total_cost_price_at_sale', 10, 2)->default(0.00);
 
             $table->unsignedInteger('quantity')->default(0);
             $table->decimal('unit_price', 10, 2)->default(0.00);

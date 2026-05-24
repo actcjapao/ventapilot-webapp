@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Services\Dashboard\DashboardService;
+
 class DashboardController extends Controller
 {
-    function loadPage() {
-        return inertia('dashboard/Dashboard');
+    function loadPage(DashboardService $dashboardService) {
+        return inertia('dashboard/Dashboard', [
+            'dashboardData' => $dashboardService->get()
+        ]);
     }
 }

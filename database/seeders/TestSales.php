@@ -56,9 +56,14 @@ class TestSales extends Seeder
                 $totalPrice = $quantity * $unitPrice; // Calculate total price
                 $totalAmount += $totalPrice; // Add to total amount for the sale
 
+                $costPriceAtSale = $product->cost_price;
+                $totalCostPriceAtSale = $costPriceAtSale * $quantity;
+
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
+                    'cost_price_at_sale' => $costPriceAtSale,
+                    'total_cost_price_at_sale' => $totalCostPriceAtSale,
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'total_price' => $totalPrice,

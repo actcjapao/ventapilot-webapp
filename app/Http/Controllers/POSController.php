@@ -91,10 +91,15 @@ class POSController extends Controller
                 $unitPrice = $product->selling_price;
                 $totalPrice = $unitPrice * $item['quantity'];
 
+                $costPriceAtSale = $product->cost_price;
+                $totalCostPriceAtSale = $costPriceAtSale * $item['quantity'];
+
                 // 4. Create Sale Item
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
+                    'cost_price_at_sale' => $costPriceAtSale,
+                    'total_cost_price_at_sale' => $totalCostPriceAtSale,
                     'quantity' => $item['quantity'],
                     'unit_price' => $unitPrice,
                     'total_price' => $totalPrice,
