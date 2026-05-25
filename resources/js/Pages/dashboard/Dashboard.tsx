@@ -129,7 +129,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             {/* Should be fetched from server */}
             {/* Keep cards visually different */}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                {/* TOTAL PRODUCTS */}
                <div className="card bg-base-100 shadow-sm">
                   <div className="card-body">
@@ -139,12 +139,12 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                               Products
                            </p>
 
-                           <h2 className="text-3xl font-bold mt-2">
+                           <h2 className="text-xl font-bold mt-2">
                               {dashboardData.metrics.total_products}
                            </h2>
                         </div>
 
-                        <div className="bg-info/15 text-info pt-3 px-3 pb-1 rounded-xl">
+                        <div className="bg-warning/10 text-warning pt-3 px-3 pb-1 rounded-xl">
                            <span className="icon-[tabler--package] size-7"></span>
                         </div>
                      </div>
@@ -169,7 +169,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                               truncate prevents overflow
                               break-all is optional for VERY huge values
                            */}
-                           <h2 className="text-3xl font-bold mt-2 truncate">
+                           <h2 className="text-xl font-bold mt-2 truncate">
                               {formatCurrency(
                                  dashboardData.metrics.total_sales_cost,
                               )}
@@ -203,7 +203,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                               truncate prevents overflow
                               break-all is optional for VERY huge values
                            */}
-                           <h2 className="text-3xl font-bold mt-2 truncate">
+                           <h2 className="text-xl font-bold mt-2 truncate">
                               {formatCurrency(
                                  dashboardData.metrics.total_sales,
                               )}
@@ -232,7 +232,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                               Net Profit
                            </p>
 
-                           <h2 className="text-2xl font-bold text-success mt-2">
+                           <h2 className="text-xl font-bold text-success mt-2">
                               {formatCurrency(
                                  dashboardData.metrics.total_profit,
                               )}
