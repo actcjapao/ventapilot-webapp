@@ -1,6 +1,7 @@
+import FlashMessages from "@/types/FlashMessages.type";
 import { PageProps } from "@/types/PageProp.type";
 import { Link, router, useForm, usePage } from "@inertiajs/react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const Login = () => {
    const { flash } = usePage<PageProps>().props;
@@ -10,12 +11,15 @@ const Login = () => {
          password: "",
       });
 
+   const [localFlash, setLocalFlash] = useState<FlashMessages | null>(null);
+
    // after successful login, we need to still disable the login button
    // while waiting for the redirection to kick in, otherwise users can
    // click it multiple times and cause multiple login requests
    const isSuccessfulLogin = Boolean(flash.success);
    const login = (e: React.SyntheticEvent) => {
       e.preventDefault();
+      setLocalFlash(null);
 
       post("/api/login", {
          preserveScroll: true,
@@ -43,6 +47,10 @@ const Login = () => {
       );
    };
 
+   useEffect(() => {
+      setLocalFlash(flash);
+   }, [flash]);
+
    return (
       <>
          <div className="min-h-screen flex items-center justify-center">
@@ -53,14 +61,14 @@ const Login = () => {
                   </h5>
                </div>
                <div className="card-body">
-                  {flash.success && (
+                  {localFlash && localFlash.success && (
                      <div className="alert alert-primary" role="alert">
-                        <span>{flash.success}</span>
+                        <span>{localFlash.success}</span>
                      </div>
                   )}
-                  {flash.error && (
+                  {localFlash && localFlash.error && (
                      <div className="alert alert-error" role="alert">
-                        <span>{flash.error}</span>
+                        <span>{localFlash.error}</span>
                      </div>
                   )}
                   <form onSubmit={login}>

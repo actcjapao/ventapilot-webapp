@@ -67,9 +67,11 @@ class AuthenticationController extends Controller
     }
 
     function logout() {
-        if(session()->has('authenticated_user')) {
+        if (session()->has('authenticated_user')) {
             session()->pull('authenticated_user');
-            return back()->with('success', 'Logged out successfully.');
         }
+
+        return redirect('/login');
     }
 }
+

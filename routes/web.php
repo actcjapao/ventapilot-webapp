@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ReportController;
+use App\Http\Middleware\AuthenticationMiddleware;
 
 // Temp Route --> This route is intended for managing session data
 Route::get('/session/{operation?}', function($operation = null){
@@ -43,23 +44,25 @@ Route::get('/posts/{post}/edit', [CrudController::class, 'edit'])->name('posts.e
 Route::put('/posts/{post}', [CrudController::class, 'update'])->name('posts.update');
 Route::delete('/posts/{post}', [CrudController::class, 'destroy'])->name('posts.destroy');
 
-// Navigation Routes
-Route::get('/registration', [RegistrationController::class, 'loadPage'])->name('registration.page.load');
-Route::get('/login', [AuthenticationController::class, 'loadPage'])->name('login.page.load');
-Route::get('/dashboard', [DashboardController::class, 'loadPage'])->name('dashboard.page.load');
-Route::get('/products', [ProductController::class, 'loadPage'])->name('products.page.load');
-Route::get('/pos', [POSController::class, 'loadPage'])->name('pos.page.load');
-Route::get('/reports', [ReportController::class, 'loadPage'])->name('reports.page.load');
+Route::middleware([AuthenticationMiddleware::class])->group(function () {
+    // Navigation Routes
+    Route::get('/registration', [RegistrationController::class, 'loadPage'])->name('registration.page.load');
+    Route::get('/login', [AuthenticationController::class, 'loadPage'])->name('login.page.load');
+    Route::get('/dashboard', [DashboardController::class, 'loadPage'])->name('dashboard.page.load');
+    Route::get('/products', [ProductController::class, 'loadPage'])->name('products.page.load');
+    Route::get('/pos', [POSController::class, 'loadPage'])->name('pos.page.load');
+    Route::get('/reports', [ReportController::class, 'loadPage'])->name('reports.page.load');
 
-// API Routes
-Route::post('/api/register', [RegistrationController::class, 'register'])->name('registration');
-Route::post('/api/login', [AuthenticationController::class, 'login'])->name('login');
-Route::post('/api/logout', [AuthenticationController::class, 'logout'])->name('logout');
+    // API Routes
+    Route::post('/api/register', [RegistrationController::class, 'register'])->name('registration');
+    Route::post('/api/login', [AuthenticationController::class, 'login'])->name('login');
+    Route::post('/api/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
-Route::post('/api/product/save/{product_uuid?}', [ProductController::class, 'save'])->name('product.save');
-Route::get('/api/product/search', [POSController::class, 'searchProducts'])->name('product.search');
-Route::put('/api/product/stock/{product_uuid}', [ProductController::class, 'updateStock'])->name('product.stock.update');
-Route::post('/api/sale', [POSController::class, 'processSale'])->name('sale.process');
-Route::post('/api/debt', [POSController::class, 'processDebt'])->name('debt.process');
-Route::get('/api/reports', [ReportController::class, 'records'])->name('reports.api.records');
-Route::get('/api/reports/sales-items/{sale_uuid}', [ReportController::class, 'getSaleItems'])->name('sale.items.get');
+    Route::post('/api/product/save/{product_uuid?}', [ProductController::class, 'save'])->name('product.save');
+    Route::get('/api/product/search', [POSController::class, 'searchProducts'])->name('product.search');
+    Route::put('/api/product/stock/{product_uuid}', [ProductController::class, 'updateStock'])->name('product.stock.update');
+    Route::post('/api/sale', [POSController::class, 'processSale'])->name('sale.process');
+    Route::post('/api/debt', [POSController::class, 'processDebt'])->name('debt.process');
+    Route::get('/api/reports', [ReportController::class, 'records'])->name('reports.api.records');
+    Route::get('/api/reports/sales-items/{sale_uuid}', [ReportController::class, 'getSaleItems'])->name('sale.items.get');
+});
