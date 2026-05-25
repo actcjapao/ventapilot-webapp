@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 
 type MainPanelLayoutProps = {
    children: React.ReactNode;
@@ -45,6 +46,26 @@ const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
 
    const applyMintlifyTheme = (path: string) => {
       return url.startsWith(path) ? "mintlify" : "";
+   };
+
+   const logOutHandler = () => {
+      const confirmed = window.confirm("Are you sure you want to log out?");
+      if (!confirmed) return;
+
+      router.post(
+         "/api/logout",
+         {},
+         {
+            preserveScroll: true,
+            onError: () => {
+               alert("Failed to logout. Please try again.");
+            },
+            onSuccess: () => {
+               router.visit("/login");
+            },
+            onFinish: () => {},
+         },
+      );
    };
 
    return (
@@ -163,7 +184,7 @@ const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
                            <li>
                               <button
                                  className="dropdown-item text-error"
-                                 onClick={() => alert("Logout clicked")}
+                                 onClick={logOutHandler}
                               >
                                  Logout
                               </button>

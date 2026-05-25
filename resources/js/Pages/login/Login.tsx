@@ -10,6 +10,10 @@ const Login = () => {
          password: "",
       });
 
+   // after successful login, we need to still disable the login button
+   // while waiting for the redirection to kick in, otherwise users can
+   // click it multiple times and cause multiple login requests
+   const isSuccessfulLogin = Boolean(flash.success);
    const login = (e: React.SyntheticEvent) => {
       e.preventDefault();
 
@@ -19,7 +23,7 @@ const Login = () => {
             reset();
             clearErrors();
 
-            // ⏳ Navigate after 2 seconds
+            // ⏳ Navigate after 1 second
             setTimeout(() => {
                router.visit("/dashboard");
             }, 1000);
@@ -109,22 +113,24 @@ const Login = () => {
                            data-theme="mintlify"
                            type="submit"
                            className="btn btn-primary btn-block"
-                           disabled={processing}
+                           disabled={processing || isSuccessfulLogin}
                         >
                            Login
                         </button>
                      </div>
-                     <div className="w-full text-center mt-4">
-                        <p className="text-sm text-gray-500">
-                           Don&apos;t have an account?{" "}
-                           <Link
-                              href="/registration"
-                              className="text-primary font-medium hover:underline"
-                           >
-                              Register
-                           </Link>
-                        </p>
-                     </div>
+                     {!isSuccessfulLogin && (
+                        <div className="w-full text-center mt-4">
+                           <p className="text-sm text-gray-500">
+                              Don&apos;t have an account?{" "}
+                              <Link
+                                 href="/registration"
+                                 className="text-primary font-medium hover:underline"
+                              >
+                                 Register
+                              </Link>
+                           </p>
+                        </div>
+                     )}
                   </form>
                </div>
             </div>
