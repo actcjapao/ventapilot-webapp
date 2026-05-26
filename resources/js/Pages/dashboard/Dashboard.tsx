@@ -264,12 +264,12 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                   <div className="card-body">
                      <div className="flex items-center justify-between mb-6">
                         <div>
-                           <h2 className="font-semibold text-lg">
-                              Sales Overview
+                           <h2 className="font-semibold text-lg text-base-content">
+                              Sales & Profit Trend
                            </h2>
 
                            <p className="text-sm text-base-content/60">
-                              Daily sales and profit analytics
+                              Visualize revenue and profit movement over time.
                            </p>
                         </div>
 
@@ -310,7 +310,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                                     <stop
                                        offset="5%"
                                        stopColor="#10b981"
-                                       stopOpacity={0.4}
+                                       stopOpacity={0.25}
                                     />
                                     <stop
                                        offset="95%"
@@ -329,7 +329,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                                     <stop
                                        offset="5%"
                                        stopColor="#3b82f6"
-                                       stopOpacity={0.4}
+                                       stopOpacity={0.25}
                                     />
                                     <stop
                                        offset="95%"
@@ -340,20 +340,32 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                               </defs>
 
                               {/* 
-                                 Renders the grid lines in the brackground both vertical and horizontal
+                                 Renders the grid lines in the background both vertical and horizontal
                                  strokeDasharray="3 3" means 3px line, 3px gap pattern
                               */}
-                              <CartesianGrid strokeDasharray="3 3" />
+                              <CartesianGrid
+                                 strokeDasharray="3 3"
+                                 stroke="#e5e7eb"
+                              />
 
                               {/* Defines/controls the horizontal labels */}
-                              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                              <XAxis
+                                 dataKey="date"
+                                 axisLine={false} // removes the horizontal line at the bottom
+                                 tickLine={false} // removes the small vertical ticks on the X axis
+                                 tick={{ fontSize: 12 }}
+                              />
 
                               {/* 
                                  Defines/controls the vertical labels
                                  By default, it will auto-scale based on the data range.
                                  Will automatically calculates (min value, max value, and spacing/intervals) based on the data set provided (sales and profit values)
                               */}
-                              <YAxis />
+                              <YAxis
+                                 axisLine={false} // removes the vertical line on the left
+                                 tickLine={false} // removes the small horizontal ticks on the Y axis
+                                 tick={{ fontSize: 12 }}
+                              />
 
                               {/* 
                                  Renders the tooltip when hovering over data points
@@ -364,13 +376,20 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                                  Can use custom tooltip:
                                  <Tooltip content={<CustomTooltip />} />
                               */}
-                              <Tooltip />
+                              <Tooltip
+                                 contentStyle={{
+                                    backgroundColor:
+                                       "rgba(255, 255, 255, 0.98)",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "12px",
+                                 }}
+                              />
 
                               {/* 
                                  Renders the legend under the chart that shows
                                  which color corresponds to which data key (sales and profit)
                               */}
-                              <Legend />
+                              <Legend verticalAlign="top" height={36} />
 
                               {/* 
                                  Renders the area charts for "sales" data based on dataKey
@@ -380,6 +399,8 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                                  type="monotone" // makes the line smooth and curve
                                  dataKey="sales"
                                  stroke="#10b981" // line color
+                                 strokeWidth={1.5} // line thickness
+                                 activeDot={{ r: 5 }} // makes the dot bigger when active/hovered
                                  fillOpacity={1}
                                  fill="url(#sales)" // Refers to the gradient defined in defs above
                               />
@@ -392,6 +413,8 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                                  type="monotone" // makes the line smooth and curve
                                  dataKey="profit"
                                  stroke="#3b82f6" // line color
+                                 strokeWidth={1.5} // line thickness
+                                 activeDot={{ r: 5 }} // makes the dot bigger when active/hovered
                                  fillOpacity={1}
                                  fill="url(#profit)" // Refers to the gradient defined in defs above
                               />
