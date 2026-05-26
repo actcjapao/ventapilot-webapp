@@ -486,22 +486,22 @@ const Products = () => {
                </div>
             </div>
             <div className="w-[30%]">
-               <div className="card bg-base-100 shadow-sm">
+               <div className="card bg-base-100 border border-gray-200 shadow-md">
                   <div className="card-body">
-                     <h3 className="card-title">Summary</h3>
+                     <h2 className="font-semibold text-lg">Summary</h2>
                      <div className="space-y-4">
                         <div>
-                           <label className="block text-sm font-medium">
+                           <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wide">
                               Total Amount
-                           </label>
-                           <p className="text-lg font-bold">
-                              ₱{totalAmount.toFixed(2)}
                            </p>
+                           <h3 className="text-2xl font-semibold mt-1 text-base-content/75">
+                              ₱ {totalAmount.toFixed(2)}
+                           </h3>
                         </div>
                         {!isDebt && (
                            <>
                               <div>
-                                 <label className="block text-sm font-medium">
+                                 <label className="block text-xs font-semibold text-base-content/50 uppercase tracking-wide">
                                     Cash
                                  </label>
                                  <input
@@ -525,17 +525,19 @@ const Products = () => {
                                  )}
                               </div>
                               <div>
-                                 <label className="block text-sm font-medium">
+                                 <label className="block text-xs font-semibold text-base-content/50 uppercase tracking-wide">
                                     Change
                                  </label>
-                                 <p className="text-lg">₱{change.toFixed(2)}</p>
+                                 <h3 className="text-2xl font-semibold text-base-content/75">
+                                    ₱ {change.toFixed(2)}
+                                 </h3>
                               </div>
                            </>
                         )}
                         {isDebt && (
                            <>
                               <div>
-                                 <label className="block text-sm font-medium">
+                                 <label className="block text-xs font-semibold text-base-content/50 uppercase tracking-wide">
                                     Customer Name
                                  </label>
                                  <input
@@ -556,7 +558,7 @@ const Products = () => {
                                     </p>
                                  )}
 
-                                 <label className="block text-sm font-medium mt-2">
+                                 <label className="block text-xs font-semibold text-base-content/50 uppercase tracking-wide mt-2">
                                     Due date{" "}
                                     <small>
                                        (<i>optional</i>)
@@ -582,7 +584,7 @@ const Products = () => {
                            onClick={processItems}
                            disabled={isProcessing}
                         >
-                           Process
+                           {isProcessing ? "Processing..." : "Process"}
                         </button>
                         <div>
                            <div className="flex items-center gap-1">
@@ -596,7 +598,7 @@ const Products = () => {
                                  disabled={cartItems.length === 0}
                               />
                               <label
-                                 className="label-text"
+                                 className="label-text text-base-content/85"
                                  htmlFor="isDebtCheckbox1"
                               >
                                  Process as Debt
