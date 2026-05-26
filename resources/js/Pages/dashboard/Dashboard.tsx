@@ -494,7 +494,10 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
                </div>
 
                {/* TOP PRODUCTS */}
-               <div className="card bg-base-100 border border-gray-200 shadow-md">
+               <div
+                  data-theme="mintlify"
+                  className="card bg-base-100 border border-gray-200 shadow-md"
+               >
                   <div className="card-body">
                      <div className="flex items-center justify-between">
                         <div>
@@ -553,7 +556,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
 
                                        <td className="text-center">
                                           <span
-                                             className={`badge badge-sm text-sm ${
+                                             className={`badge badge-sm text-sm text-white ${
                                                 product.stock_left <= 15
                                                    ? "badge-error"
                                                    : "badge-success"
