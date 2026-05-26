@@ -93,13 +93,15 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             {/* DASHBOARD HEADER */}
             {/* ===================================================== */}
 
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                <div>
-                  <h1 className="text-2xl font-bold">Business Dashboard</h1>
+                  <h1 className="text-3xl font-semibold text-base-content tracking-tight">
+                     Business Dashboard
+                  </h1>
 
-                  <p className="text-sm text-base-content/60 mt-1">
+                  <p className="text-sm text-base-content/65 mt-1 max-w-2xl leading-7">
                      Monitor your inventory, sales performance, and profit
-                     trends.
+                     trends with clear, actionable insights.
                   </p>
                </div>
 
