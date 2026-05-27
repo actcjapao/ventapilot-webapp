@@ -451,7 +451,10 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
 
                      <div className="overflow-x-auto mt-4">
                         <table className="table table-sm min-w-full">
-                           <thead className="bg-base-200/80 text-base-content/60 text-xs uppercase tracking-wide">
+                           <thead
+                              data-theme="mintlify"
+                              className="bg-base-200/80 text-base-content/60 text-xs uppercase tracking-wide"
+                           >
                               <tr>
                                  <th className="py-3">Date</th>
                                  <th className="py-3">Day</th>
