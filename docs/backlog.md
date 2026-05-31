@@ -94,6 +94,8 @@ subscriptions
 
 - id
 - uuid
+
+- user_id
 - plan (trial, premium)
 - status
    - trialing (trial phase)
