@@ -106,8 +106,8 @@ subscriptions
 - billing_cycle (monthly, yearly)
 - trial_start_at
 - trial_end_at
-- current_period_start
-- current_period_end
+- current_period_start_at
+- current_period_end_at
 - next_billing_at
 - cancel_at_period_end
 - canceled_at

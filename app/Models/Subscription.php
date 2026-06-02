@@ -31,8 +31,15 @@ class Subscription extends Model
     protected $fillable = [
         'user_id',
         'plan',
-        'expiry_date',
-        'next_billing_date',
+        'status',
+        'billing_cycle',
+        'trial_start_at',
+        'trial_end_at',
+        'current_period_start_at',
+        'current_period_end_at',
+        'next_billing_at',
+        'cancel_at_period_end',
+        'canceled_at',
     ];
 
     /**
