@@ -63,6 +63,9 @@ class AuthenticationMiddleware
             /**
              * Store authenticated user into request attributes
              * so other middleware/controllers can access it
+             * 
+             * Upon logout, we don't need to clear this request attribute as $isAuthenticated will be false
+             * and the middleware will redirect to login page
              */
             $request->attributes->set(
                 'authenticated_user',
