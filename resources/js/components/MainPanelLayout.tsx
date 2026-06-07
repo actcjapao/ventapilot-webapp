@@ -87,7 +87,8 @@ const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
             >
                <div className="p-4 border-b border-b-gray-200 border-base-300">
                   <h2 className="text-xl font-semibold pb-1">
-                     Smart Sari Store
+                     <span className="text-base-content/80">Venta</span>
+                     <span className="text-success">Pilot</span>
                   </h2>
                </div>
 
