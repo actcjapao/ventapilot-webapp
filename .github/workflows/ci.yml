@@ -6,7 +6,7 @@ push:
     - development
 
 jobs:
-  deploy_production:
+  deploy_development:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/development' # Only run this job for 'development' branch
     steps:
