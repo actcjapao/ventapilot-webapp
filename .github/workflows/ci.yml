@@ -8,7 +8,7 @@ on:
 jobs:
   deploy_production:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/development' # Only run this job for 'main' branch
+    if: github.ref == 'refs/heads/development' # Only run this job for 'main' branch c
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
