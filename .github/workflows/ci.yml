@@ -3,12 +3,12 @@ name: Deploy to Hostinger
 on:
   push:
     branches:
-      - development
+      - main
 
 jobs:
   deploy_production:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/development' # Only run this job for 'develop' branch
+    if: github.ref == 'refs/heads/main' # Only run this job for 'main' branch (setup reference for dual envs: TourismWebsite repo)
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
