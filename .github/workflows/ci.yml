@@ -27,7 +27,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           # Add the SSH host key to known_hosts
-          ssh-keyscan -p 65002 37.44.245.93 >> ~/.ssh/known_hosts
+          ssh-keyscan -p 65002 153.92.9.58 >> ~/.ssh/known_hosts
 
           # Set the correct permissions for the known_hosts file
           chmod 644 ~/.ssh/known_hosts
