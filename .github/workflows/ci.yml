@@ -49,9 +49,6 @@ jobs:
             # Ensure Composer is available in the PATH or specify its location (got from echoing first the composer path through which composer command in local machine)
             COMPOSER=/usr/local/bin/composer
 
-            echo "PHP84=\${PHP84}" &&
-            echo "COMPOSER=\${COMPOSER}" &&
-
             echo -e \"\${YELLOW}🔄 Navigating to VentaPilot Hostinger local repository directory...\${NC}\" &&
             cd domains/ventapilot.com/public_html/subdomains/webapp/ventapilot-webapp &&
 
@@ -64,15 +61,15 @@ jobs:
 
             # Run database migrations with the --force flag to bypass confirmation prompts
             echo -e \"\${YELLOW}🛠 Running database migrations...\${NC}\" &&
-            $PHP84 artisan migrate --force &&
+            \${PHP84} artisan migrate --force &&
 
             # Clear and cache configuration, routes, and views for optimal performance
             echo -e \"\${YELLOW}🧠 Caching config files...\${NC}\" &&
-            $PHP84 artisan config:cache &&
+            \${PHP84} artisan config:cache &&
             echo -e \"\${YELLOW}🧠 Caching routes...\${NC}\" &&
-            $PHP84 artisan route:cache &&
+            \${PHP84} artisan route:cache &&
             echo -e \"\${YELLOW}🧠 Caching views...\${NC}\" &&
-            $PHP84 artisan view:cache &&
+            \${PHP84} artisan view:cache &&
 
             echo -e \"\${GREEN}✅ Deployment completed successfully\${NC}\"
           "
