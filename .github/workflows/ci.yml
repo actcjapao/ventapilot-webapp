@@ -57,7 +57,7 @@ jobs:
 
             # Install Composer dependencies without dev packages, optimizing the autoloader
             echo -e \"\${YELLOW}📦 Installing Composer dependencies...\${NC}\" &&
-           \${PHP84} \${COMPOSER} install --no-interaction --prefer-dist --optimize-autoloader --no-dev &&
+            \${PHP84} \${COMPOSER} install --no-interaction --prefer-dist --optimize-autoloader --no-dev &&
 
             # Run database migrations with the --force flag to bypass confirmation prompts
             echo -e \"\${YELLOW}🛠 Running database migrations...\${NC}\" &&
