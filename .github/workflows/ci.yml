@@ -44,8 +44,32 @@ jobs:
             YELLOW='\033[1;33m'
             NC='\033[0m' # No Color
 
+            # Explicitly use PHP 8.4 for Composer and Artisan commands available on Hostinger
+            PHP84=/opt/alt/php84/usr/bin/php
+            # Ensure Composer is available in the PATH or specify its location
+            COMPOSER=$(which composer)
+
             echo -e \"\${YELLOW}🔄 Navigating to VentaPilot Hostinger local repository directory...\${NC}\" &&
             cd domains/ventapilot.com/public_html/subdomains/webapp/ventapilot-webapp &&
+
+            echo -e \"\${YELLOW}⬇️ Pulling latest changes from origin/main...\${NC}\" &&
+            git pull origin main &&
+
+            # Install Composer dependencies without dev packages, optimizing the autoloader
+            echo -e \"\${YELLOW}📦 Installing Composer dependencies...\${NC}\" &&
+            $PHP84 $COMPOSER install --no-interaction --prefer-dist --optimize-autoloader --no-dev &&
+
+            # Run database migrations with the --force flag to bypass confirmation prompts
+            echo -e \"\${YELLOW}🛠 Running database migrations...\${NC}\" &&
+            $PHP84 artisan migrate --force &&
+
+            # Clear and cache configuration, routes, and views for optimal performance
+            echo -e \"\${YELLOW}🧠 Caching config files...\${NC}\" &&
+            $PHP84 artisan config:cache &&
+            echo -e \"\${YELLOW}🧠 Caching routes...\${NC}\" &&
+            $PHP84 artisan route:cache &&
+            echo -e \"\${YELLOW}🧠 Caching views...\${NC}\" &&
+            $PHP84 artisan view:cache
 
             echo -e \"\${GREEN}✅ Deployment completed successfully!\${NC}\"
           "
