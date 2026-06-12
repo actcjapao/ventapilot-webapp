@@ -46,8 +46,8 @@ jobs:
 
             # Explicitly use PHP 8.4 for Composer and Artisan commands available on Hostinger (got from GitBash locally via SSH remote targeting Hostinger account)
             PHP84=/opt/alt/php84/usr/bin/php
-            # Ensure Composer is available in the PATH or specify its location (got from echoing first the composer path through which composer command)
-            COMPOSER=/usr/bin/composer
+            # Ensure Composer is available in the PATH or specify its location
+            COMPOSER=$(which composer)
 
             echo "PHP84=\${PHP84}" &&
             echo "COMPOSER=\${COMPOSER}" &&
