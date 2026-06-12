@@ -48,6 +48,7 @@ jobs:
             PHP84=/opt/alt/php84/usr/bin/php
             # Ensure Composer is available in the PATH or specify its location (got from GitBash locally via SSH remote targeting Hostinger account)
             COMPOSER=/usr/local/bin/composer
+            echo "which composer: $(which composer 2>/dev/null || echo NOT_FOUND)" &&
 
             echo -e \"\${YELLOW}🔄 Navigating to VentaPilot Hostinger local repository directory...\${NC}\" &&
             cd domains/ventapilot.com/public_html/subdomains/webapp/ventapilot-webapp &&
