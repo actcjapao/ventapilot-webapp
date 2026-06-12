@@ -50,7 +50,7 @@ jobs:
             COMPOSER=/usr/bin/composer
 
             echo "PHP84=\$PHP84" &&
-            echo "COMPOSER=\$COMPOSER" &&
+            echo "COMPOSERR=\$COMPOSER" &&
 
             echo -e \"\${YELLOW}🔄 Navigating to VentaPilot Hostinger local repository directory...\${NC}\" &&
             cd domains/ventapilot.com/public_html/subdomains/webapp/ventapilot-webapp &&
