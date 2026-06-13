@@ -65,7 +65,7 @@ jobs:
 
             # Clear and cache configuration, routes, and views for optimal performance
             echo -e "${YELLOW}🧹 Clearing old caches...${NC}" &&
-            ${PHP84} artisan optimize:clear &&
+            \${PHP84} artisan optimize:clear &&
             echo -e \"\${YELLOW}🧠 Caching config files...\${NC}\" &&
             \${PHP84} artisan config:cache &&
             echo -e \"\${YELLOW}🧠 Caching routes...\${NC}\" &&
