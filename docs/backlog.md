@@ -24,7 +24,6 @@ This will serve as my guide throughout the development, deployment, & monitoring
 Infra side
 
 - [📝] Continue with the CI/CD pipeline setup
-   - Ensure php binary compatibility if running php artisan commands within the CI/CD pipeline
    - Finalize the app (sessioning, product list caching, product list searching, proper filterings)
 
 ## Medium Priority
@@ -141,7 +140,8 @@ payments
 
 ### To take note on environment setup in production (Hostinger)
 
-- make sure APP_NAME is set
-- make sure APP_KEY is generated
-- make sure APP_ENV is production
-- make sure APP_URL is properly set
+- make sure APP_NAME=set
+- make sure APP_KEY=generated
+- make sure APP_ENV=production
+- make sure APP_URL=properly set
+- make sure SESSION_DRIVER=file
