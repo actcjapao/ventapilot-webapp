@@ -163,13 +163,19 @@ const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
                   </div>
 
                   <div className="flex items-center gap-4">
-                     <span
-                        data-theme="mintlify"
-                        className="badge badge-outline border-dashed badge-primary"
-                     >
-                        {userStore?.store_name ?? "--"}
-                     </span>
-                     <span className="text-sm">{user?.name ?? "--"}</span>
+                     <div className="flex items-center gap-2 min-w-0">
+                        <div className="min-w-0">
+                           <p
+                              data-theme="mintlify"
+                              className="truncate text-sm font-medium text-primary leading-tight rounded-2xl px-2.5"
+                           >
+                              {userStore?.store_name ?? "--"}
+                           </p>
+                           <p className="truncate text-xs text-base-content/60 hidden sm:block ps-2.5">
+                              {user?.name ?? "--"}
+                           </p>
+                        </div>
+                     </div>
                      <div className="dropdown relative inline-flex">
                         <button
                            type="button"
@@ -177,7 +183,10 @@ const MainPanelLayout = ({ children, title }: MainPanelLayoutProps) => {
                            aria-haspopup="true"
                            aria-expanded="false"
                         >
-                           <div className="bg-primary/10 text-primary size-8 rounded-full flex items-center justify-center">
+                           <div
+                              data-theme="mintlify"
+                              className="bg-primary/10 text-primary size-8 rounded-full flex items-center justify-center"
+                           >
                               <span className="text-md uppercase pb-0.5">
                                  {initials}
                               </span>
